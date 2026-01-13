@@ -92,7 +92,7 @@ class EquipmentAssignmentResource extends Resource
                 //
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

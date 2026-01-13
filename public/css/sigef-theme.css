@@ -1185,3 +1185,74 @@ html .fi-modal .fi-modal-header button svg {
 
 /* REMOVIDO - Usar cores padrao Filament */
 
+
+/* ========================================================================== */
+/* ===== CABECALHO DA TABELA - FUNDO AZUL #041842 ===== */
+/* ========================================================================== */
+
+/* Fundo azul do cabecalho */
+.fi-ta-header,
+.fi-ta-header-cell,
+thead tr,
+table thead,
+table thead tr,
+.fi-table thead,
+.fi-table thead tr {
+    background-color: #041842 !important;
+}
+
+/* Texto branco no cabecalho */
+.fi-ta-header-cell,
+.fi-ta-header-cell span,
+.fi-ta-header-cell button,
+.fi-ta-header-cell-label,
+thead th,
+thead th span,
+thead th button,
+.fi-table thead th {
+    color: #ffffff !important;
+}
+
+/* Icones de ordenacao brancos */
+.fi-ta-header-cell svg,
+thead th svg {
+    color: #ffffff !important;
+}
+
+/* Checkbox do cabecalho - borda branca */
+.fi-ta-header-cell input[type="checkbox"],
+thead th input[type="checkbox"] {
+    border-color: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== CABECALHO DA PAGINA (BOTAO CRIAR) - COR PADRAO ===== */
+/* ========================================================================== */
+
+/* Resetar o header da pagina para cor padrao */
+.fi-header,
+.fi-simple-header,
+.fi-page-header,
+.fi-resource-header {
+    background-color: transparent !important;
+}
+
+/* Texto do titulo da pagina - cor padrao */
+.fi-header-heading,
+.fi-simple-header-heading,
+.fi-page-header-heading {
+    color: inherit !important;
+}
+
+/* Subtitulo - cor padrao */
+.fi-header-subheading,
+.fi-simple-header-subheading {
+    color: inherit !important;
+}
+
+/* ===== RESETAR FUNDO DO HEADER DA TABELA (AREA DO BOTAO) ===== */
+.fi-ta-header,
+.fi-ta-header-adaptive-actions-position {
+    background-color: transparent !important;
+    background: transparent !important;
+}
