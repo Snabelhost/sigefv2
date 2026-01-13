@@ -1002,3 +1002,186 @@ button.fi-btn:hover {
 .dark img.fi-user-avatar {
     filter: none !important;
 }
+
+/* ===== HOVER DO BOTAO SALVAR E CRIAR OUTRO ===== */
+.fi-modal-footer button:hover,
+.fi-modal-footer-actions button:hover,
+button[wire\\:click*="createAnother"]:hover,
+.fi-ac-action:hover {
+    color: #ffffff !important;
+}
+
+/* Icone dentro do botao tambem branco no hover */
+.fi-modal-footer button:hover svg,
+.fi-modal-footer-actions button:hover svg,
+button[wire\\:click*="createAnother"]:hover svg {
+    color: #ffffff !important;
+}
+
+/* ===== BOTAO SALVAR E CRIAR OUTRO - HOVER BRANCO ===== */
+/* Seletor correto usando atributo wire:click */
+button[wire\\:click*="another"]:hover,
+button[wire\\:click*="another"]:hover span {
+    color: #ffffff !important;
+}
+
+button[wire\\:click*="another"]:hover svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* Botao cancelar vermelho */
+.fi-modal button.fi-color-danger,
+.fi-modal button[x-on\\:click*="close"] {
+    background-color: #e31212 !important;
+    border-color: #e31212 !important;
+}
+
+/* ===== BOTAO SALVAR E CRIAR OUTRO - FIX FINAL ===== */
+/* Usando seletor mais generico para botoes do modal */
+.fi-modal .fi-ac-btn-action:not(.fi-color-primary):not(.fi-color-danger):hover,
+.fi-modal .fi-ac-btn-action:not(.fi-color-primary):not(.fi-color-danger):hover * {
+    color: #ffffff !important;
+}
+
+/* Background do hover */
+.fi-modal .fi-ac-btn-action:not(.fi-color-primary):not(.fi-color-danger):hover {
+    background-color: #5c69ff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - BOTOES DO MODAL ===== */
+/* ========================================================================== */
+
+/* Botao Cancelar - vermelho #e31212 */
+.dark .fi-modal .fi-color-danger,
+.dark .fi-modal button.fi-color-danger {
+    background-color: #e31212 !important;
+    border-color: #e31212 !important;
+    color: #ffffff !important;
+}
+
+/* Botao Salvar e criar outro - icone branco */
+.dark .fi-modal .fi-ac-btn-action:not(.fi-color-primary):not(.fi-color-danger) svg,
+.dark .fi-modal .fi-ac-btn-action:not(.fi-color-primary):not(.fi-color-danger) .fi-icon {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* Texto do botao Salvar e criar outro tambem branco */
+.dark .fi-modal .fi-ac-btn-action:not(.fi-color-primary):not(.fi-color-danger) span {
+    color: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== FIX FINAL - BOTOES MODAL DARK MODE ===== */
+/* ========================================================================== */
+
+/* Cancelar vermelho - seletores multiplos */
+.dark .fi-modal button.fi-color-danger,
+.dark .fi-modal .fi-btn.fi-color-danger,
+.dark .fi-ac-btn-action.fi-color-danger {
+    background-color: #e31212 !important;
+    border-color: #e31212 !important;
+    color: #ffffff !important;
+}
+
+/* Icone do Salvar e criar outro - branco */
+.dark .fi-modal .fi-ac-btn-action svg,
+.dark .fi-ac-btn-action svg {
+    color: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO CLARO - CABECALHO DO MODAL ===== */
+/* ========================================================================== */
+
+/* Titulo do modal */
+.fi-modal-heading,
+.fi-modal h2,
+.fi-modal-header h2,
+.fi-modal [class*="heading"] {
+    color: #041842 !important;
+}
+
+/* ===== MODO CLARO - TITULO DO MODAL AZUL ===== */
+html:not(.dark) .fi-modal-header .fi-modal-heading,
+html:not(.dark) .fi-modal-heading,
+html:not(.dark) h2.fi-modal-heading {
+    color: #041842 !important;
+}
+
+/* ========================================================================== */
+/* ===== CABECALHO DO MODAL ESTILIZADO ===== */
+/* ========================================================================== */
+
+/* Fundo azul escuro no cabecalho do modal */
+.fi-modal-header {
+    background-color: #041842 !important;
+    padding: 1rem 1.5rem !important;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+/* Titulo branco */
+.fi-modal-header .fi-modal-heading,
+.fi-modal-header h2 {
+    color: #ffffff !important;
+}
+
+/* Icone do modal branco */
+.fi-modal-header svg,
+.fi-modal-header .fi-icon {
+    color: #ffffff !important;
+}
+
+/* Botao fechar (X) branco */
+.fi-modal-header button,
+.fi-modal-close-button,
+.fi-modal-header [type="button"] {
+    color: #ffffff !important;
+}
+
+.fi-modal-header button:hover {
+    color: #e5e7eb !important;
+}
+
+/* ===== TEXTO DO CABECALHO DO MODAL BRANCO ===== */
+.fi-modal-heading,
+h2.fi-modal-heading,
+.fi-modal-header h2,
+.fi-modal-header .fi-modal-heading {
+    color: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== FIX FINAL - CABECALHO MODAL AZUL COM TEXTO BRANCO ===== */
+/* ========================================================================== */
+
+/* Fundo azul escuro e texto branco - alta especificidade */
+html .fi-modal .fi-modal-header,
+html.dark .fi-modal .fi-modal-header,
+html:not(.dark) .fi-modal .fi-modal-header {
+    background-color: #041842 !important;
+    padding: 1rem 1.5rem !important;
+}
+
+/* Titulo SEMPRE branco - maior especificidade */
+html .fi-modal .fi-modal-header .fi-modal-heading,
+html .fi-modal .fi-modal-header h2,
+html.dark .fi-modal .fi-modal-heading,
+html:not(.dark) .fi-modal .fi-modal-heading {
+    color: #ffffff !important;
+}
+
+/* Botao X branco */
+html .fi-modal .fi-modal-header button,
+html .fi-modal .fi-modal-close-button {
+    color: #ffffff !important;
+}
+
+html .fi-modal .fi-modal-header button svg {
+    color: #ffffff !important;
+}
+
+/* REMOVIDO - Usar cores padrao Filament */
+

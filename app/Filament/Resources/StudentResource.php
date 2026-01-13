@@ -163,8 +163,8 @@ class StudentResource extends Resource
                 \Filament\Actions\CreateAction::make(),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+                \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
                 Tables\Actions\Action::make('guiaMarcha')
                     ->label('Guia de Marcha')
                     ->icon('heroicon-s-document-arrow-down')
@@ -199,3 +199,5 @@ class StudentResource extends Resource
         ];
     }
 }
+
+
