@@ -112,8 +112,12 @@ class InstitutionResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -133,8 +137,6 @@ class InstitutionResource extends Resource
     {
         return [
             'index' => Pages\ListInstitutions::route('/'),
-            'create' => Pages\CreateInstitution::route('/create'),
-            'edit' => Pages\EditInstitution::route('/{record}/edit'),
         ];
     }
 }

@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->login(false) // Desabilitar login do painel - usar /login unificado
             ->brandLogo(fn () => view('filament.brand-logo'))
             ->brandLogoHeight('50px')
+            ->sidebarCollapsibleOnDesktop()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchDebounce(500)
             ->colors([
@@ -58,6 +59,28 @@ class AdminPanelProvider extends PanelProvider
                     <link rel="shortcut icon" href="/favicon.png">
                     <link rel="apple-touch-icon" href="/favicon.png">
                     <script src="/js/favicon-inject.js"></script>
+                    <script>
+                        // Remover botão nativo de colapso do Filament
+                        document.addEventListener("DOMContentLoaded", function() {
+                            function removeNativeCollapseButton() {
+                                // Procurar botões na sidebar header que não são nosso botão customizado
+                                const sidebarHeader = document.querySelector(".fi-sidebar-header");
+                                if (sidebarHeader) {
+                                    const buttons = sidebarHeader.querySelectorAll("button:not(.brand-logo-btn)");
+                                    buttons.forEach(function(btn) {
+                                        if (!btn.classList.contains("brand-logo-btn")) {
+                                            btn.style.display = "none";
+                                            btn.remove();
+                                        }
+                                    });
+                                }
+                            }
+                            removeNativeCollapseButton();
+                            setTimeout(removeNativeCollapseButton, 100);
+                            setTimeout(removeNativeCollapseButton, 500);
+                            setTimeout(removeNativeCollapseButton, 1000);
+                        });
+                    </script>
                 '
             )
             ->renderHook(

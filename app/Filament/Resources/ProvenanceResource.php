@@ -60,8 +60,12 @@ class ProvenanceResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -81,8 +85,6 @@ class ProvenanceResource extends Resource
     {
         return [
             'index' => Pages\ListProvenances::route('/'),
-            'create' => Pages\CreateProvenance::route('/create'),
-            'edit' => Pages\EditProvenance::route('/{record}/edit'),
         ];
     }
 }

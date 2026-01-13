@@ -72,8 +72,12 @@ class CoursePhaseResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -93,8 +97,6 @@ class CoursePhaseResource extends Resource
     {
         return [
             'index' => Pages\ListCoursePhases::route('/'),
-            'create' => Pages\CreateCoursePhase::route('/create'),
-            'edit' => Pages\EditCoursePhase::route('/{record}/edit'),
         ];
     }
 }

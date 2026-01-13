@@ -159,8 +159,12 @@ class StudentResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('guiaMarcha')
                     ->label('Guia de Marcha')
                     ->icon('heroicon-s-document-arrow-down')
@@ -192,8 +196,6 @@ class StudentResource extends Resource
     {
         return [
             'index' => Pages\ListStudents::route('/'),
-            'create' => Pages\CreateStudent::route('/create'),
-            'edit' => Pages\EditStudent::route('/{record}/edit'),
         ];
     }
 }

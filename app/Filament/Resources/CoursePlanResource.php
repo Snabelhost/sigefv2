@@ -72,8 +72,12 @@ class CoursePlanResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -93,8 +97,6 @@ class CoursePlanResource extends Resource
     {
         return [
             'index' => Pages\ListCoursePlans::route('/'),
-            'create' => Pages\CreateCoursePlan::route('/create'),
-            'edit' => Pages\EditCoursePlan::route('/{record}/edit'),
         ];
     }
 }

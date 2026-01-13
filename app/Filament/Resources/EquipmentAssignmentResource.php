@@ -97,8 +97,12 @@ class EquipmentAssignmentResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -118,8 +122,6 @@ class EquipmentAssignmentResource extends Resource
     {
         return [
             'index' => Pages\ListEquipmentAssignments::route('/'),
-            'create' => Pages\CreateEquipmentAssignment::route('/create'),
-            'edit' => Pages\EditEquipmentAssignment::route('/{record}/edit'),
         ];
     }
 }

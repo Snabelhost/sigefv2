@@ -111,8 +111,12 @@ class StudentLeaveResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -132,8 +136,6 @@ class StudentLeaveResource extends Resource
     {
         return [
             'index' => Pages\ListStudentLeaves::route('/'),
-            'create' => Pages\CreateStudentLeave::route('/create'),
-            'edit' => Pages\EditStudentLeave::route('/{record}/edit'),
         ];
     }
 }

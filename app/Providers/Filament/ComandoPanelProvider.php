@@ -28,6 +28,7 @@ class ComandoPanelProvider extends PanelProvider
             ->id('comando')
             ->path('comando')
             ->login(false) // Desabilitar login do painel - usar /login unificado
+            ->sidebarCollapsibleOnDesktop()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchDebounce(500)
             ->colors([
@@ -48,12 +49,30 @@ class ComandoPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn () => '
-                    <link rel="stylesheet" href="/css/sigef-theme.css">
+                    <link rel="stylesheet" href="/css/sigef-theme.css?v=' . time() . '">
                     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
                     <link rel="icon" type="image/png" href="/favicon.png">
                     <link rel="shortcut icon" href="/favicon.png">
                     <link rel="apple-touch-icon" href="/favicon.png">
                     <script src="/js/favicon-inject.js"></script>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            function removeNativeCollapseButton() {
+                                const sidebarHeader = document.querySelector(".fi-sidebar-header");
+                                if (sidebarHeader) {
+                                    const buttons = sidebarHeader.querySelectorAll("button:not(.brand-logo-btn)");
+                                    buttons.forEach(function(btn) {
+                                        if (!btn.classList.contains("brand-logo-btn")) {
+                                            btn.remove();
+                                        }
+                                    });
+                                }
+                            }
+                            removeNativeCollapseButton();
+                            setTimeout(removeNativeCollapseButton, 100);
+                            setTimeout(removeNativeCollapseButton, 500);
+                        });
+                    </script>
                 '
             )
             ->renderHook(

@@ -74,8 +74,12 @@ class SelectionTestResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -95,8 +99,6 @@ class SelectionTestResource extends Resource
     {
         return [
             'index' => Pages\ListSelectionTests::route('/'),
-            'create' => Pages\CreateSelectionTest::route('/create'),
-            'edit' => Pages\EditSelectionTest::route('/{record}/edit'),
         ];
     }
 }

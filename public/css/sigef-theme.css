@@ -68,6 +68,81 @@
 /* O botão na sidebar permanece visível */
 #sigef-sidebar-toggle {
     display: none !important;
+}
+
+/* OCULTAR BOTÃO NATIVO DE COLAPSO DO FILAMENT NA TOPBAR - APENAS DESKTOP */
+@media (min-width: 1024px) {
+
+    .fi-topbar-collapse-sidebar-btn-ctn,
+    .fi-topbar-close-collapse-sidebar-btn,
+    .fi-topbar-open-collapse-sidebar-btn {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        left: -9999px !important;
+    }
+}
+
+/* MOSTRAR BOTÃO NATIVO NO MOBILE COM COR VISÍVEL */
+@media (max-width: 1023px) {
+
+    .fi-topbar-open-sidebar-btn,
+    .fi-topbar .fi-icon-btn,
+    button[x-on\\:click="$store.sidebar.open()"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: auto !important;
+        height: auto !important;
+        position: static !important;
+        color: #041c4f !important;
+        /* Cor azul escura visível */
+    }
+
+    .fi-topbar-open-sidebar-btn svg,
+    .fi-topbar .fi-icon-btn svg {
+        color: #041c4f !important;
+        stroke: #041c4f !important;
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
+
+/* Ocultar TODOS os botões nativos de colapso do Filament - usamos o nosso customizado */
+.fi-sidebar .sidebar-toggle,
+.fi-sidebar-header .sidebar-toggle,
+.fi-sidebar #sigef-sidebar-toggle,
+.fi-sidebar-header #sigef-sidebar-toggle,
+.fi-sidebar-header>button,
+.fi-sidebar-header button[x-on\\:click*="sidebar"],
+button.fi-sidebar-close-btn,
+button.fi-sidebar-open-btn,
+.fi-sidebar-header nav+button,
+.fi-sidebar-header a+button,
+/* Filament 4 - botão de colapso específico */
+.fi-sidebar-header button[type="button"],
+.fi-sidebar button[x-show],
+.fi-sidebar-header~button,
+button[x-on\\:click="$store.sidebar.isOpen ? $store.sidebar.close() : $store.sidebar.open()"],
+.fi-layout>aside>header>button,
+aside.fi-sidebar>header>button,
+.fi-sidebar>header>button,
+.fi-sidebar header button:not(.brand-logo-btn),
+/* Botão de seta específico antes da logo */
+.fi-sidebar-header>button:first-child,
+.fi-sidebar-header button:first-of-type:not(.brand-logo-btn),
+header.fi-sidebar-header>button,
+.fi-sidebar-header>*:first-child:is(button),
+button[x-on\\:click*="$store.sidebar"],
+.fi-icon-btn-size-md,
+button.fi-icon-btn {
+    display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     width: 0 !important;
@@ -79,45 +154,15 @@
     left: -9999px !important;
 }
 
-/* Manter visível apenas o botão da sidebar */
-.fi-sidebar .sidebar-toggle,
-.fi-sidebar-header .sidebar-toggle,
-.fi-sidebar #sigef-sidebar-toggle,
-.fi-sidebar-header #sigef-sidebar-toggle {
+/* Garantir que nosso botão customizado permaneça visível */
+button.brand-logo-btn {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
-    min-height: 40px !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
     position: static !important;
     left: auto !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 8px !important;
-    background-color: #f3f4f6 !important;
-    color: #374151 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    border: none !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
-}
-
-.fi-sidebar .sidebar-toggle:hover,
-.fi-sidebar-header .sidebar-toggle:hover {
-    background-color: #e5e7eb !important;
-    color: #111827 !important;
-}
-
-.fi-sidebar .sidebar-toggle svg,
-.fi-sidebar-header .sidebar-toggle svg {
-    width: 24px !important;
-    height: 24px !important;
-    stroke: #374151 !important;
-    fill: none !important;
 }
 
 /* ===== SIDEBAR / MENU LATERAL (apenas área de navegação) ===== */
@@ -375,16 +420,10 @@ header .fi-icon svg {
     color: #ffffff !important;
 }
 
-/* Botão de colapso na sidebar (footer) */
+/* Botão de colapso na sidebar (footer) - OCULTAR pois usamos botão customizado no header */
+.fi-sidebar-footer,
 .fi-sidebar-footer button {
-    color: rgba(255, 255, 255, 0.8) !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-radius: 8px !important;
-}
-
-.fi-sidebar-footer button:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
+    display: none !important;
 }
 
 /* ===== HOVER PARA BOTÕES GERAIS ===== */

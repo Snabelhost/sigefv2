@@ -118,8 +118,12 @@ class EvaluationResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -139,8 +143,6 @@ class EvaluationResource extends Resource
     {
         return [
             'index' => Pages\ListEvaluations::route('/'),
-            'create' => Pages\CreateEvaluation::route('/create'),
-            'edit' => Pages\EditEvaluation::route('/{record}/edit'),
         ];
     }
 }

@@ -56,8 +56,12 @@ class RecruitmentTypeResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -77,8 +81,6 @@ class RecruitmentTypeResource extends Resource
     {
         return [
             'index' => Pages\ListRecruitmentTypes::route('/'),
-            'create' => Pages\CreateRecruitmentType::route('/create'),
-            'edit' => Pages\EditRecruitmentType::route('/{record}/edit'),
         ];
     }
 }

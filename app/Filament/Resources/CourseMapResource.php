@@ -111,8 +111,12 @@ class CourseMapResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -132,8 +136,6 @@ class CourseMapResource extends Resource
     {
         return [
             'index' => Pages\ListCourseMaps::route('/'),
-            'create' => Pages\CreateCourseMap::route('/create'),
-            'edit' => Pages\EditCourseMap::route('/{record}/edit'),
         ];
     }
 }

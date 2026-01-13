@@ -89,8 +89,12 @@ class StudentClassResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -110,8 +114,6 @@ class StudentClassResource extends Resource
     {
         return [
             'index' => Pages\ListStudentClasses::route('/'),
-            'create' => Pages\CreateStudentClass::route('/create'),
-            'edit' => Pages\EditStudentClass::route('/{record}/edit'),
         ];
     }
 }

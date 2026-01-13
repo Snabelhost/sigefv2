@@ -92,8 +92,13 @@ class AcademicYearResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make()
+                    ->label('Novo Ano Académico'),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -113,8 +118,6 @@ class AcademicYearResource extends Resource
     {
         return [
             'index' => Pages\ListAcademicYears::route('/'),
-            'create' => Pages\CreateAcademicYear::route('/create'),
-            'edit' => Pages\EditAcademicYear::route('/{record}/edit'),
         ];
     }
 }

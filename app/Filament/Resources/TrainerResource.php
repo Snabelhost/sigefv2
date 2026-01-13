@@ -135,8 +135,12 @@ class TrainerResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -156,8 +160,6 @@ class TrainerResource extends Resource
     {
         return [
             'index' => Pages\ListTrainers::route('/'),
-            'create' => Pages\CreateTrainer::route('/create'),
-            'edit' => Pages\EditTrainer::route('/{record}/edit'),
         ];
     }
 }

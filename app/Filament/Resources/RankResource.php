@@ -69,8 +69,12 @@ class RankResource extends Resource
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make(),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
@@ -90,8 +94,6 @@ class RankResource extends Resource
     {
         return [
             'index' => Pages\ListRanks::route('/'),
-            'create' => Pages\CreateRank::route('/create'),
-            'edit' => Pages\EditRank::route('/{record}/edit'),
         ];
     }
 }
