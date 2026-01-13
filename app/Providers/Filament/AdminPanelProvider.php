@@ -35,6 +35,8 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchDebounce(500)
+            ->databaseNotifications()
+            ->defaultAvatarProvider(\App\Providers\CustomAvatarProvider::class)
             ->colors([
                 'primary' => [
                     50 => '236, 239, 247',   // muito claro

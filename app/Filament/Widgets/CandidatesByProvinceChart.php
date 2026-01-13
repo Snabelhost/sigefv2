@@ -34,16 +34,16 @@ class CandidatesByProvinceChart extends ChartWidget
                         'label' => 'Candidatos',
                         'data' => $data->pluck('total')->toArray(),
                         'backgroundColor' => [
-                            'rgba(252, 165, 165, 0.4)', // Rosa suave
-                            'rgba(253, 186, 116, 0.4)', // Laranja suave
-                            'rgba(253, 224, 71, 0.4)',  // Amarelo suave
-                            'rgba(110, 231, 183, 0.4)', // Verde suave
-                            'rgba(147, 197, 253, 0.4)', // Azul suave
-                            'rgba(167, 139, 250, 0.4)', // Roxo suave
-                            'rgba(244, 114, 182, 0.4)', // Rosa choque suave
-                            'rgba(45, 212, 191, 0.4)',  // Teall suave
-                            'rgba(251, 146, 60, 0.4)',  // Laranja forte suave
-                            'rgba(125, 211, 252, 0.4)', // Sky suave
+                            'rgba(252, 165, 165, 1)', // Rosa
+                            'rgba(253, 186, 116, 1)', // Laranja
+                            'rgba(253, 224, 71, 1)',  // Amarelo
+                            'rgba(110, 231, 183, 1)', // Verde
+                            'rgba(147, 197, 253, 1)', // Azul
+                            'rgba(167, 139, 250, 1)', // Roxo
+                            'rgba(244, 114, 182, 1)', // Rosa choque
+                            'rgba(45, 212, 191, 1)',  // Teal
+                            'rgba(251, 146, 60, 1)',  // Laranja forte
+                            'rgba(125, 211, 252, 1)', // Sky
                         ],
                         'borderWidth' => 0, // Sem bordas conforme solicitado
                     ],

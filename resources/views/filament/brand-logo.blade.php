@@ -7,13 +7,13 @@
         type="button"
         class="brand-logo-btn hidden lg:flex"
         x-data="{}"
-        x-on:click="$store.sidebar.isOpen ? $store.sidebar.close() : $store.sidebar.open()"
-        style="margin-left: 100px; padding: 4px; border-radius: 4px; border: none; background: transparent; cursor: pointer; align-items: center; justify-content: center; transition: all 0.2s; visibility: visible !important; opacity: 1 !important; width: 14px !important; height: 14px !important; position: static !important;"
+        x-on:click.prevent.stop="$store.sidebar.isOpen ? $store.sidebar.close() : $store.sidebar.open()"
+        style="margin-left: 100px; padding: 2px; border-radius: 3px; border: none; background: transparent; cursor: pointer; align-items: center; justify-content: center; transition: all 0.2s; visibility: visible !important; opacity: 1 !important; width: 10px !important; height: 10px !important; position: static !important;"
         onmouseover="this.style.opacity='0.7'"
         onmouseout="this.style.opacity='1'"
         title="Esconder/Mostrar Menu"
     >
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#041842" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#041842" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -30,7 +30,7 @@
 >
     <button 
         type="button"
-        x-on:click="$dispatch('open-sidebar')"
+        x-on:click.prevent.stop="$dispatch('open-sidebar')"
         style="padding: 10px; border-radius: 8px; border: none; background: rgba(4, 24, 66, 0.9); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"
         title="Abrir Menu"
     >

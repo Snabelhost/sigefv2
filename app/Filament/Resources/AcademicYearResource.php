@@ -93,7 +93,7 @@ class AcademicYearResource extends Resource
                 //
             ])
             ->headerActions([
-                \Filament\Actions\CreateAction::make()
+                \Filament\Actions\CreateAction::make()->icon('heroicon-o-plus')
                     ->label('Novo Ano Académico'),
             ])
             ->actions([

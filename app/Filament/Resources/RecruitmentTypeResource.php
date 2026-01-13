@@ -57,7 +57,7 @@ class RecruitmentTypeResource extends Resource
                 //
             ])
             ->headerActions([
-                \Filament\Actions\CreateAction::make(),
+                \Filament\Actions\CreateAction::make()->icon('heroicon-o-plus'),
             ])
             ->actions([
                 \Filament\Actions\EditAction::make(),

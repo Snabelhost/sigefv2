@@ -32,10 +32,10 @@ class CandidateStatusChart extends ChartWidget
                         $counts['admitted'] ?? 0,
                     ],
                     'backgroundColor' => [
-                        'rgba(253, 186, 116, 0.4)', // Pendentes
-                        'rgba(110, 231, 183, 0.4)', // Aprovados
-                        'rgba(252, 165, 165, 0.4)', // Rejeitados
-                        'rgba(147, 197, 253, 0.4)', // Admitidos
+                        'rgba(253, 186, 116, 1)', // Pendentes
+                        'rgba(110, 231, 183, 1)', // Aprovados
+                        'rgba(252, 165, 165, 1)', // Rejeitados
+                        'rgba(147, 197, 253, 1)', // Admitidos
                     ],
                     'borderWidth' => 0,
                 ],

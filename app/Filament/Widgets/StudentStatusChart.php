@@ -24,11 +24,11 @@ class StudentStatusChart extends ChartWidget
         ];
         
         $colors = [
-            'alistado' => 'rgba(253, 186, 116, 0.4)',  // Laranja
-            'frequenta' => 'rgba(147, 197, 253, 0.4)', // Azul
-            'concluiu' => 'rgba(110, 231, 183, 0.4)',  // Verde
-            'desistiu' => 'rgba(252, 165, 165, 0.4)',  // Vermelho/Rosa suave
-            'expulso' => 'rgba(244, 114, 182, 0.4)',   // Rosa choque suave
+            'alistado' => 'rgba(253, 186, 116, 1)',  // Laranja
+            'frequenta' => 'rgba(147, 197, 253, 1)', // Azul
+            'concluiu' => 'rgba(110, 231, 183, 1)',  // Verde
+            'desistiu' => 'rgba(252, 165, 165, 1)',  // Vermelho/Rosa
+            'expulso' => 'rgba(244, 114, 182, 1)',   // Rosa choque
         ];
 
         // Uma única query em vez de 5 queries separadas

@@ -450,3 +450,555 @@ button.fi-btn:hover {
     background-color: #5c69ff !important;
     color: #ffffff !important;
 }
+/* ========================================================================== */
+/* ===== MODO DARK - REMOVER CORES AZUIS CUSTOMIZADAS ===== */
+/* ===== Usa cores padrao do Filament no modo escuro ===== */
+/* ========================================================================== */
+
+/* Reset das cores azuis no modo dark - usar cores padrao Filament */
+.dark .fi-logo,
+.dark .fi-sidebar-header .fi-logo,
+.dark .fi-sidebar-header a .fi-logo,
+.dark .fi-logo span,
+.dark .fi-sidebar-header .fi-logo span,
+.dark .fi-sidebar-header a span {
+    color: inherit !important;
+}
+
+/* Sidebar no dark - remover gradiente azul, usar padrao */
+.dark .fi-sidebar-nav {
+    background: inherit !important;
+}
+
+/* Cabecalho tabelas no dark - usar cor padrao cinza */
+.dark .fi-ta-header-cell,
+.dark thead tr,
+.dark table thead tr {
+    background-color: inherit !important;
+}
+
+.dark .fi-ta-header-cell-label,
+.dark .fi-ta-header-cell span,
+.dark thead th,
+.dark thead th span,
+.dark thead th button,
+.dark thead th button span {
+    color: inherit !important;
+}
+
+/* Icones de ordenacao no dark */
+.dark .fi-ta-header-cell svg,
+.dark thead th svg {
+    color: inherit !important;
+    stroke: currentColor !important;
+}
+
+/* Botao toggle sidebar - branco no dark */
+.dark .brand-logo-btn svg {
+    stroke: #ffffff !important;
+}
+
+/* Botoes - usar cores padrao Filament */
+.dark .fi-btn,
+.dark .fi-btn-primary {
+    background-color: inherit !important;
+    border-color: unset !important;
+}
+
+.dark .fi-btn:hover,
+.dark .fi-btn-primary:hover {
+    background-color: inherit !important;
+}
+
+/* Menu lateral itens - usar cores padrao */
+.dark .fi-sidebar-item-button,
+.dark .fi-sidebar-item a {
+    color: inherit !important;
+    background-color: inherit !important;
+}
+
+.dark .fi-sidebar-item-button:hover,
+.dark .fi-sidebar-item a:hover {
+    background-color: inherit !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - ELEMENTOS BRANCOS ===== */
+/* ========================================================================== */
+
+/* Logo SIGEF - texto branco no dark */
+.dark .fi-logo span,
+.dark .fi-sidebar-header span,
+.dark .fi-sidebar-header .fi-logo span,
+.dark .fi-sidebar-header a span,
+.dark div[style*="SIGEF"] span {
+    color: #ffffff !important;
+}
+
+/* Titulos das listagens - brancos */
+.dark h1,
+.dark .fi-header-heading,
+.dark .fi-page-header h1,
+.dark [class*="fi-header"] h1 {
+    color: #ffffff !important;
+}
+
+/* Subtitulos/descricoes */
+.dark .fi-header-subheading,
+.dark .fi-page-header p,
+.dark [class*="fi-header"] p {
+    color: #9ca3af !important;
+}
+
+/* Icones do cabecalho das listagens - brancos */
+.dark .fi-header svg,
+.dark .fi-page-header svg,
+.dark #dynamic-icon-container svg,
+.dark [id*="dynamic-icon"] svg,
+.dark .fi-header-heading svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* Botao toggle sidebar - branco */
+.dark .brand-logo-btn svg {
+    stroke: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - BOTOES E HOVER DO MENU ===== */
+/* ========================================================================== */
+
+/* Botao criar novo registro na listagem */
+.dark .fi-btn,
+.dark .fi-btn-primary,
+.dark button.fi-btn,
+.dark a.fi-btn {
+    background-color: #5c69ff !important;
+    border-color: #5c69ff !important;
+    color: #ffffff !important;
+}
+
+.dark .fi-btn:hover,
+.dark .fi-btn-primary:hover,
+.dark button.fi-btn:hover,
+.dark a.fi-btn:hover {
+    background-color: #4f5bd5 !important;
+    border-color: #4f5bd5 !important;
+}
+
+/* Botao criar no formulario/modal */
+.dark .fi-modal-footer .fi-btn,
+.dark .fi-form-actions .fi-btn,
+.dark .fi-ac-btn-action {
+    background-color: #5c69ff !important;
+    border-color: #5c69ff !important;
+    color: #ffffff !important;
+}
+
+/* Hover do menu lateral */
+.dark .fi-sidebar-item-button:hover,
+.dark .fi-sidebar-item a:hover,
+.dark .fi-sidebar-nav-item:hover > a,
+.dark .fi-sidebar-nav-item:hover > button,
+.dark [class*="fi-sidebar"] a:hover,
+.dark [class*="fi-sidebar"] button:hover:not(.brand-logo-btn) {
+    background-color: #5c69ff !important;
+    color: #ffffff !important;
+}
+
+/* Item ativo do menu */
+.dark .fi-sidebar-item-active,
+.dark .fi-sidebar-item-active a,
+.dark .fi-sidebar-item-active button {
+    background-color: #5c69ff !important;
+    color: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - SUBSTITUIR TODOS OS AZUIS POR #5c69ff ===== */
+/* ========================================================================== */
+
+/* Links azuis */
+.dark a,
+.dark .fi-link,
+.dark [class*="text-primary"],
+.dark [class*="text-blue"],
+.dark .text-primary-600 {
+    color: #5c69ff !important;
+}
+
+/* Bordas azuis */
+.dark [class*="border-primary"],
+.dark [class*="border-blue"],
+.dark .border-primary-600 {
+    border-color: #5c69ff !important;
+}
+
+/* Backgrounds azuis */
+.dark [class*="bg-primary"],
+.dark [class*="bg-blue"],
+.dark .bg-primary-600 {
+    background-color: #5c69ff !important;
+}
+
+/* Rings/Focus azuis */
+.dark [class*="ring-primary"],
+.dark [class*="ring-blue"],
+.dark .ring-primary-600 {
+    --tw-ring-color: #5c69ff !important;
+}
+
+/* Badges azuis */
+.dark .fi-badge,
+.dark .fi-sidebar-item-badge {
+    background-color: #5c69ff !important;
+    color: #ffffff !important;
+}
+
+/* Tabs ativos */
+.dark .fi-tabs-tab-active,
+.dark [aria-selected="true"] {
+    border-color: #5c69ff !important;
+    color: #5c69ff !important;
+}
+
+/* Checkbox e Radio checked */
+.dark input[type="checkbox"]:checked,
+.dark input[type="radio"]:checked {
+    background-color: #5c69ff !important;
+    border-color: #5c69ff !important;
+}
+
+/* Toggle/Switch ativo */
+.dark .fi-toggle-on,
+.dark [aria-checked="true"] {
+    background-color: #5c69ff !important;
+}
+
+/* Pagination ativo */
+.dark .fi-pagination-item-active,
+.dark .pagination .active {
+    background-color: #5c69ff !important;
+    border-color: #5c69ff !important;
+}
+
+/* Icones azuis */
+.dark .text-primary-500 svg,
+.dark .text-primary-600 svg,
+.dark [class*="text-blue"] svg {
+    color: #5c69ff !important;
+}
+
+/* Stats/Widgets com cor primaria */
+.dark .fi-wi-stats-overview-stat-color-primary {
+    --c-400: #5c69ff !important;
+    --c-500: #5c69ff !important;
+    --c-600: #5c69ff !important;
+}
+
+/* Alerts info/primary */
+.dark .fi-alert-primary,
+.dark .fi-alert-info {
+    background-color: rgba(92, 105, 255, 0.1) !important;
+    border-color: #5c69ff !important;
+}
+
+/* Progress bars */
+.dark .fi-progress-bar {
+    background-color: #5c69ff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - AJUSTES FINAIS ===== */
+/* ========================================================================== */
+
+/* Botao excluir - manter cor padrao vermelha */
+.dark .fi-ac-action[style*="danger"],
+.dark .fi-btn-danger,
+.dark button[wire\\:click*="delete"],
+.dark a[wire\\:click*="delete"],
+.dark .text-danger-600,
+.dark [class*="danger"] {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #ffffff !important;
+}
+
+.dark .fi-link-danger,
+.dark .fi-ac-action-color-danger,
+.dark a[class*="danger"],
+.dark button[class*="danger"] {
+    color: #ef4444 !important;
+    background-color: transparent !important;
+}
+
+.dark .fi-link-danger:hover,
+.dark a[class*="danger"]:hover {
+    color: #f87171 !important;
+}
+
+/* Borda dos campos ao focar - #5c69ff */
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus,
+.dark .fi-input:focus,
+.dark .fi-select:focus,
+.dark [type="text"]:focus,
+.dark [type="email"]:focus,
+.dark [type="password"]:focus,
+.dark [type="number"]:focus,
+.dark [type="date"]:focus,
+.dark [type="search"]:focus {
+    border-color: #5c69ff !important;
+    box-shadow: 0 0 0 1px #5c69ff !important;
+    --tw-ring-color: #5c69ff !important;
+    outline: none !important;
+}
+
+/* Ring focus para todos os inputs */
+.dark .fi-input-wrp:focus-within,
+.dark .fi-fo-field-wrp:focus-within input,
+.dark .fi-fo-field-wrp:focus-within textarea,
+.dark .fi-fo-field-wrp:focus-within select {
+    border-color: #5c69ff !important;
+    --tw-ring-color: #5c69ff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - LOGO E ICONES DO CABECALHO ===== */
+/* ========================================================================== */
+
+/* Filtro de cor na Logo para branco */
+.dark .fi-sidebar-header img,
+.dark .fi-logo img,
+.dark img[alt*="SIGEF"],
+.dark img[alt*="Logo"],
+.dark img[src*="logo"] {
+    filter: brightness(0) invert(1) !important;
+}
+
+/*/* Icones do cabecalho das listagens - brancos */
+.dark .fi-header svg,
+.dark .fi-page-header svg,
+.dark #dynamic-icon-container svg,
+.dark [id*="dynamic-icon"] svg,
+.dark .fi-header-heading svg,
+.dark .fi-resource-header svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - ICONES CABECALHO COM FUNDO #5c69ff ===== */
+/* ========================================================================== */
+
+/* Container do icone - fundo #5c69ff */
+.dark #dynamic-icon-container,
+.dark [id*="dynamic-icon"],
+.dark .fi-header-icon,
+.dark .fi-resource-header-icon,
+.dark .fi-page-header-icon {
+    background-color: #5c69ff !important;
+    border-radius: 8px !important;
+    padding: 8px !important;
+}
+
+/* SVG do icone - branco */
+.dark .fi-header svg,
+.dark .fi-page-header svg,
+.dark #dynamic-icon-container svg,
+.dark [id*="dynamic-icon"] svg,
+.dark .fi-header-heading svg,
+.dark .fi-resource-header svg,
+.dark .fi-header-icon svg,
+.dark .fi-page-header-icon svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - ICONE DO CABECALHO CORRIGIDO ===== */
+/* ========================================================================== */
+
+/* Remover fundo azul escuro do container do icone */
+.dark .fi-header-icon,
+.dark .fi-resource-header-icon,
+.dark [class*="header-icon"],
+.dark .fi-page-header > div:first-child,
+.dark .fi-header > div > div:first-child {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* Container do icone dinamico */
+.dark #dynamic-icon-container,
+.dark [id*="dynamic-icon"] {
+    background-color: #5c69ff !important;
+    background: #5c69ff !important;
+}
+
+/* O proprio icone SVG dentro */
+.dark #dynamic-icon-container svg,
+.dark [id*="dynamic-icon"] svg {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* Fallback para outros containers de icone */
+.dark .rounded-lg[style*="background"],
+.dark .fi-header .rounded-lg {
+    background-color: #5c69ff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - ICONE CABECALHO CORRECAO FINAL ===== */
+/* ========================================================================== */
+
+/* Remover background do container do icone */
+.dark #sigef-dynamic-icon {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Icone SVG com cor #5c69ff */
+.dark #sigef-dynamic-icon svg {
+    color: #5c69ff !important;
+    fill: #5c69ff !important;
+}
+
+/* Filhos do SVG tambem */
+.dark #sigef-dynamic-icon svg path,
+.dark #sigef-dynamic-icon svg rect,
+.dark #sigef-dynamic-icon svg circle,
+.dark #sigef-dynamic-icon svg * {
+    fill: #5c69ff !important;
+    stroke: #5c69ff !important;
+}
+
+/* ===== ICONE SVG BRANCO ===== */
+.dark #sigef-dynamic-icon svg,
+.dark #sigef-dynamic-icon svg path,
+.dark #sigef-dynamic-icon svg rect,
+.dark #sigef-dynamic-icon svg circle,
+.dark #sigef-dynamic-icon svg * {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - GRAFICOS COM CORES PADRAO ===== */
+/* ========================================================================== */
+
+/* Resetar cores dos graficos para usar padrao do tema */
+.dark .fi-wi-chart,
+.dark .fi-wi-stats-overview,
+.dark [class*="chart"],
+.dark canvas {
+    /* Usar cores padrao */
+}
+
+/* Cards dos graficos - fundo padrao */
+.dark .fi-wi-chart-container,
+.dark .fi-section,
+.dark .fi-card {
+    background-color: inherit !important;
+}
+
+/* Texto dos graficos */
+.dark .fi-wi-chart text,
+.dark .fi-wi-chart .chart-label,
+.dark [class*="chart"] text {
+    fill: #9ca3af !important;
+    color: #9ca3af !important;
+}
+
+/* Eixos dos graficos */
+.dark .fi-wi-chart line,
+.dark [class*="chart"] line {
+    stroke: #374151 !important;
+}
+
+/* Titulos dos widgets/graficos */
+.dark .fi-wi-chart-header,
+.dark .fi-card-header,
+.dark .fi-section-header {
+    color: #ffffff !important;
+}
+
+.dark .fi-wi-chart-header h3,
+.dark .fi-card-header h3,
+.dark .fi-section-header h3 {
+    color: #ffffff !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - GRAFICOS SEM CUSTOMIZACAO ===== */
+/* ===== Deixar cores padrao do Filament/Chart.js ===== */
+/* ========================================================================== */
+
+/* Garantir que graficos nao sejam afetados por regras globais */
+.dark .fi-wi svg,
+.dark .fi-wi-chart svg,
+.dark .fi-wi-stats-overview svg,
+.dark [wire\\:id] svg:not(.fi-icon):not([class*="header"]) {
+    color: unset !important;
+    fill: unset !important;
+    stroke: unset !important;
+}
+
+/* Canvas dos graficos - nao alterar */
+.dark canvas {
+    filter: none !important;
+}
+
+/* Icone de notificacao no topbar */
+.dark .fi-topbar-database-notifications-btn,
+.dark .fi-notification-btn,
+.dark [class*="notification"] button {
+    color: #ffffff !important;
+}
+
+.dark .fi-topbar-database-notifications-btn:hover,
+.dark .fi-notification-btn:hover {
+    color: #5c69ff !important;
+}
+
+/* Badge de contagem de notificacoes */
+.dark .fi-topbar-database-notifications-btn .fi-badge,
+.dark .fi-notification-btn .fi-badge {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== MODO DARK - AVATAR SEM FILTRO ===== */
+/* Remover filtro do avatar para manter fundo preto */
+.dark .fi-user-menu-trigger img,
+.dark .fi-avatar,
+.dark .fi-user-avatar,
+.dark img.fi-avatar,
+.dark img.fi-user-avatar {
+    filter: none !important;
+}
