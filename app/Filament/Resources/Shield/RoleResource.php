@@ -32,7 +32,7 @@ class RoleResource extends BaseRoleResource
     {
         return [
             'index' => \BezhanSalleh\FilamentShield\Resources\Roles\Pages\ListRoles::route('/'),
-            'create' => \BezhanSalleh\FilamentShield\Resources\Roles\Pages\CreateRole::route('/create'),
+            'create' => Pages\CreateRole::route('/create'),
             'view' => \BezhanSalleh\FilamentShield\Resources\Roles\Pages\ViewRole::route('/{record}'),
             'edit' => Pages\EditRole::route('/{record}/edit'),
         ];

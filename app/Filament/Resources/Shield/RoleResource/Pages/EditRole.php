@@ -41,4 +41,17 @@ class EditRole extends BaseEditRole
             'permissions_count' => $this->record->permissions->count(),
         ]);
     }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction()
+                ->icon('heroicon-o-check')
+                ->label('Salvar'),
+            $this->getCancelFormAction()
+                ->icon('heroicon-o-x-mark')
+                ->label('Cancelar')
+                ->color('danger'),
+        ];
+    }
 }
