@@ -1,0 +1,199 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\StudentResource\Pages;
+use App\Filament\Resources\StudentResource\RelationManagers;
+use App\Models\Student;
+use Filament\Forms;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class StudentResource extends Resource
+{
+    protected static ?string $model = Student::class;
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-user-circle';
+    public static function getModelLabel(): string
+    {
+        return 'Formando';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Formandos';
+    }
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
+
+    // Eager loading para evitar problema N+1
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with(['candidate', 'institution', 'currentPhase']);
+    }
+
+    public static function form(Schema $form): Schema
+    {
+        return $form
+            ->schema([
+                \Filament\Schemas\Components\Section::make('Informação Académica')
+                    ->schema([
+                        Forms\Components\Select::make('candidate_id')
+                            ->label('Candidato')
+                            ->relationship('candidate', 'full_name')
+                            ->required()
+                            ->searchable(),
+                        Forms\Components\Select::make('institution_id')
+                            ->label('Escola')
+                            ->relationship('institution', 'name')
+                            ->required()
+                            ->searchable()
+                            ->preload(),
+                        Forms\Components\Select::make('course_map_id')
+                            ->label('Mapa de Curso')
+                            ->relationship('courseMap', 'id')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->full_title)
+                            ->required()
+                            ->searchable()
+                            ->preload(),
+                        Forms\Components\TextInput::make('student_number')
+                            ->label('Nº de Ordem')
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(191),
+                        Forms\Components\Select::make('student_type')
+                            ->label('Tipo de Formando')
+                            ->options([
+                                'cadete' => 'Cadete',
+                                'subalterno' => 'Subalterno',
+                                'sargento' => 'Sargento',
+                                'praça' => 'Praça',
+                            ])
+                            ->required(),
+                        Forms\Components\DatePicker::make('enrollment_date')
+                            ->label('Data de Matrícula')
+                            ->required()
+                            ->default(now()),
+                    ])->columns(2),
+
+                \Filament\Schemas\Components\Section::make('Estado e Unidade')
+                    ->schema([
+                        Forms\Components\Select::make('status')
+                            ->label('Estado')
+                            ->options([
+                                'alistado' => 'Alistado',
+                                'frequenta' => 'Frequenta',
+                                'concluiu' => 'Concluiu',
+                                'desistiu' => 'Desistiu',
+                                'expulso' => 'Expulso',
+                                'falecido' => 'Falecido',
+                            ])
+                            ->required()
+                            ->default('alistado'),
+                        Forms\Components\TextInput::make('nuri')
+                            ->label('NURI')
+                            ->maxLength(191),
+                        Forms\Components\TextInput::make('cia')
+                            ->label('Companhia')
+                            ->maxLength(191),
+                        Forms\Components\TextInput::make('platoon')
+                            ->label('Pelotão')
+                            ->maxLength(191),
+                        Forms\Components\TextInput::make('section')
+                            ->label('Secção')
+                            ->maxLength(191),
+                        Forms\Components\Select::make('current_phase_id')
+                            ->label('Fase Actual')
+                            ->relationship('currentPhase', 'name')
+                            ->preload(),
+                    ])->columns(2),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->deferLoading()
+            ->striped()
+            ->columns([
+                Tables\Columns\TextColumn::make('student_number')
+                    ->label('Nº Ordem')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('candidate.full_name')
+                    ->label('Nome')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('institution.name')
+                    ->label('Escola')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('student_type')
+                    ->label('Tipo'),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Estado')
+                    ->colors([
+                        'warning' => 'alistado',
+                        'primary' => 'frequenta',
+                        'success' => 'concluiu',
+                        'danger' => ['desistiu', 'expulso', 'falecido'],
+                    ]),
+                Tables\Columns\TextColumn::make('cia')
+                    ->label('CIA'),
+                Tables\Columns\TextColumn::make('enrollment_date')
+                    ->label('Matrícula')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                \Filament\Actions\EditAction::make(),
+                Tables\Actions\Action::make('guiaMarcha')
+                    ->label('Guia de Marcha')
+                    ->icon('heroicon-s-document-arrow-down')
+                    ->color('success')
+                    ->url(fn ($record) => route('reports.march-guide', $record))
+                    ->openUrlInNewTab(),
+                Tables\Actions\Action::make('historico')
+                    ->label('Histórico')
+                    ->icon('heroicon-s-clipboard-document-list')
+                    ->color('info')
+                    ->url(fn ($record) => route('reports.student-history', $record))
+                    ->openUrlInNewTab(),
+            ])
+            ->bulkActions([
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListStudents::route('/'),
+            'create' => Pages\CreateStudent::route('/create'),
+            'edit' => Pages\EditStudent::route('/{record}/edit'),
+        ];
+    }
+}

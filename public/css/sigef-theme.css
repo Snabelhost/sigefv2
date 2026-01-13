@@ -1,0 +1,413 @@
+/**
+ * SIGEF - Sistema Integrado de Gestão Formativa
+ * Custom Theme CSS - Cor Padrão: #041c4f
+ * Aplicado apenas em: Navegação do Menu Lateral (exceto header) e Títulos
+ */
+
+:root {
+    /* Cor Padrão SIGEF - Azul escuro */
+    --sigef-primary: #041c4f;
+    --sigef-primary-light: #0a2d6e;
+    --sigef-primary-dark: #021030;
+    --sigef-primary-600: #2e508f;
+    /* Cor de Hover do Menu - Azul/Roxo claro */
+    --sigef-menu-hover: #5c69ff;
+    /* Cor do Logo */
+    --sigef-logo-color: #041c4f;
+}
+
+/* ===== LOGO SIGEF ===== */
+.fi-logo,
+.fi-sidebar-header .fi-logo,
+.fi-sidebar-header a .fi-logo {
+    color: #041c4f !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+}
+
+/* Garantir que o texto SIGEF apareça */
+.fi-sidebar-header .fi-logo span,
+.fi-sidebar-header a span,
+.fi-logo span {
+    color: #041c4f !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* Ícone SVG do logo */
+.fi-sidebar-header .fi-logo svg,
+.fi-sidebar-header a svg,
+.fi-logo svg {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    min-height: 50px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Texto SIGEF no logo */
+.fi-sidebar-header .fi-logo span,
+.fi-sidebar-header a span,
+.fi-logo span {
+    color: #041c4f !important;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.05em !important;
+}
+
+.fi-logo::before {
+    content: none !important;
+}
+
+/* ===== OCULTAR BOTÃO SIGEF-SIDEBAR-TOGGLE DO TOPBAR ===== */
+/* Ocultar o botão #sigef-sidebar-toggle que está no topbar */
+/* O botão na sidebar permanece visível */
+#sigef-sidebar-toggle {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* Manter visível apenas o botão da sidebar */
+.fi-sidebar .sidebar-toggle,
+.fi-sidebar-header .sidebar-toggle,
+.fi-sidebar #sigef-sidebar-toggle,
+.fi-sidebar-header #sigef-sidebar-toggle {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: static !important;
+    left: auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.fi-sidebar .sidebar-toggle:hover,
+.fi-sidebar-header .sidebar-toggle:hover {
+    background-color: #e5e7eb !important;
+    color: #111827 !important;
+}
+
+.fi-sidebar .sidebar-toggle svg,
+.fi-sidebar-header .sidebar-toggle svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke: #374151 !important;
+    fill: none !important;
+}
+
+/* ===== SIDEBAR / MENU LATERAL (apenas área de navegação) ===== */
+/* Aplicar gradiente apenas na área de navegação, não no header */
+.fi-sidebar-nav {
+    background: linear-gradient(180deg, var(--sigef-primary) 0%, var(--sigef-primary-dark) 100%) !important;
+    border-right: none !important;
+}
+
+/* Forçar texto branco em TODOS os elementos do menu */
+.fi-sidebar-item-label,
+.fi-sidebar-item-button span,
+.fi-sidebar-nav span,
+.fi-sidebar-item-button .fi-sidebar-item-label {
+    color: #ffffff !important;
+}
+
+/* Ícone SVG do menu também branco */
+.fi-sidebar-item-button svg,
+.fi-sidebar-item-icon svg,
+.fi-sidebar-item svg,
+.fi-sidebar-nav svg,
+.fi-sidebar-group svg,
+.fi-sidebar-item-button .fi-sidebar-item-icon,
+.fi-sidebar-item-button .fi-sidebar-item-icon svg,
+/* Filament 4 específico */
+.fi-sidebar-item-button [class*="icon"],
+.fi-sidebar-item-button [class*="icon"] svg,
+.fi-sidebar-nav-groups svg,
+.fi-sidebar-nav-groups [class*="icon"],
+.fi-sidebar-nav [data-slot="icon"],
+.fi-sidebar-nav [data-slot="icon"] svg {
+    color: #ffffff !important;
+    fill: currentColor !important;
+}
+
+.fi-sidebar-nav-groups {
+    padding: 0.5rem !important;
+}
+
+/* Links do Sidebar */
+.fi-sidebar-item {
+    margin-bottom: 2px !important;
+}
+
+.fi-sidebar-item-button,
+.fi-sidebar-item-btn,
+.fi-sidebar-item a,
+.fi-sidebar-nav a {
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+/* HOVER - Cor #5c69ff ao passar o mouse */
+.fi-sidebar-item-button:hover,
+.fi-sidebar-item-btn:hover,
+.fi-sidebar-item a:hover,
+.fi-sidebar-nav a:hover,
+.fi-sidebar-item:hover>a,
+.fi-sidebar-item:hover>button,
+.fi-sidebar-item:hover .fi-sidebar-item-button,
+.fi-sidebar-item:hover .fi-sidebar-item-btn {
+    background: #5c69ff !important;
+    background-color: #5c69ff !important;
+    color: #ffffff !important;
+}
+
+.fi-sidebar-item-button.fi-active,
+.fi-sidebar-item>a.fi-active,
+.fi-sidebar-nav .fi-sidebar-item-button.fi-active,
+/* Seletor para quando fi-active está no LI pai */
+.fi-sidebar-item.fi-active .fi-sidebar-item-button,
+.fi-sidebar-item.fi-active>a,
+/* Sobrescrever classes Tailwind bg-gray-100 */
+.fi-sidebar-item-button.bg-gray-100,
+.fi-sidebar-nav .fi-sidebar-item-button.bg-gray-100,
+.dark .fi-sidebar-item-button.dark\:bg-white\/5 {
+    background: #5c69ff !important;
+    background-color: #5c69ff !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Ícones do Sidebar - garantir branco */
+.fi-sidebar-item-icon,
+.fi-sidebar-item-icon svg,
+.fi-sidebar-nav .fi-sidebar-item-icon,
+.fi-sidebar-nav .fi-sidebar-item-icon svg {
+    color: #ffffff !important;
+}
+
+.fi-sidebar-item-button:hover .fi-sidebar-item-icon,
+.fi-sidebar-item-button:hover .fi-sidebar-item-icon svg,
+.fi-sidebar-item-button.fi-active .fi-sidebar-item-icon,
+.fi-sidebar-item-button.fi-active .fi-sidebar-item-icon svg,
+.fi-sidebar-item-button:hover svg,
+.fi-sidebar-item-button.fi-active svg {
+    color: #ffffff !important;
+}
+
+/* Grupos do Sidebar */
+.fi-sidebar-group-label {
+    color: #a2a2ab !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    padding: 1rem 0.75rem 0.5rem !important;
+}
+
+/* Navigation Groups Buttons */
+.fi-sidebar-group-button {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.fi-sidebar-group-button:hover {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Badge de Notificação no Sidebar (ex: Funções) */
+.fi-sidebar-item-badge,
+.fi-sidebar-item-button .fi-badge,
+.fi-sidebar-nav .fi-badge,
+.fi-sidebar-item-button span.fi-badge,
+/* Elementos internos do badge */
+.fi-badge span,
+.fi-badge .truncate,
+.fi-badge .grid,
+.fi-sidebar-item-button .fi-badge span,
+.fi-sidebar-item-button .fi-badge .truncate,
+.fi-sidebar-nav .fi-badge span,
+.fi-sidebar-nav .fi-badge .truncate {
+    color: #ff0000 !important;
+}
+
+/* Badge do menu Funções (Shield) - todos os elementos */
+.fi-sidebar-item-button .min-w-\[theme\(spacing\.6\)\],
+.fi-sidebar-item-button .min-w-\[theme\(spacing\.6\)\] span,
+.fi-sidebar-item-button [class*="badge"],
+.fi-sidebar-item-button [class*="badge"] span,
+.fi-sidebar-item-button .rounded-md.text-xs,
+.fi-sidebar-item-button .rounded-md.text-xs span {
+    color: #ff0000 !important;
+}
+
+/* Scrollbar da Sidebar */
+.fi-sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== TÍTULOS E HEADERS ===== */
+.fi-header-heading {
+    color: var(--sigef-primary) !important;
+    font-weight: 700 !important;
+}
+
+.fi-header-subheading {
+    color: var(--sigef-primary-600) !important;
+}
+
+/* ===== ÍCONE DO HEADER DA PÁGINA (LISTAGEM) ===== */
+/* Forçar tamanho grande no ícone do header */
+.fi-header-heading svg,
+.fi-header svg,
+.fi-header .fi-icon svg,
+.fi-header-heading .fi-icon svg,
+[class*="fi-header"] .fi-icon svg,
+.fi-page-header svg,
+.fi-simple-header svg,
+header .fi-icon svg {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    min-width: 2.5rem !important;
+    min-height: 2.5rem !important;
+    max-width: 2.5rem !important;
+    max-height: 2.5rem !important;
+}
+
+/* Container do ícone no header */
+.fi-header .fi-icon,
+.fi-header-heading .fi-icon,
+[class*="fi-header"] .fi-icon,
+.fi-page-header .fi-icon,
+.fi-simple-header .fi-icon {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    min-width: 2.5rem !important;
+    min-height: 2.5rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+}
+
+/* Section Headers */
+.fi-section-header-heading {
+    color: var(--sigef-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* ===== DARK MODE - Manter sidebar consistente ===== */
+.dark .fi-sidebar-nav {
+    background: linear-gradient(180deg, var(--sigef-primary) 0%, var(--sigef-primary-dark) 100%) !important;
+}
+
+.dark .fi-header-heading {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.dark .fi-section-header-heading {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* ===== BOTÃO DE TOGGLE DO SIDEBAR ===== */
+/* Estilo para o botão de colapsar/expandir sidebar - no header */
+.fi-sidebar-header button {
+    color: var(--sigef-primary) !important;
+}
+
+.fi-sidebar-header button:hover {
+    color: var(--sigef-primary-light) !important;
+    background: rgba(4, 28, 79, 0.1) !important;
+}
+
+/* Botões de colapsar/expandir na topbar móvel */
+.fi-sidebar-close-button,
+.fi-sidebar-open-button,
+.fi-topbar-close-sidebar-btn,
+.fi-topbar-open-sidebar-btn {
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-sidebar-close-button:hover,
+.fi-sidebar-open-button:hover,
+.fi-topbar-close-sidebar-btn:hover,
+.fi-topbar-open-sidebar-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+/* Botão de colapso na sidebar (footer) */
+.fi-sidebar-footer button {
+    color: rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+}
+
+.fi-sidebar-footer button:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+/* ===== HOVER PARA BOTÕES GERAIS ===== */
+/* Botões primários */
+.fi-btn-primary:hover,
+.fi-btn:hover,
+button.fi-btn:hover {
+    background-color: #5c69ff !important;
+    border-color: #5c69ff !important;
+}
+
+/* Botões de ação na tabela */
+.fi-ta-btn:hover,
+.fi-action-btn:hover {
+    background-color: #5c69ff !important;
+    color: #ffffff !important;
+}
+
+/* Links de navegação na sidebar - força hover */
+.fi-sidebar-nav li:hover>a,
+.fi-sidebar-nav li:hover>button,
+[class*="fi-sidebar"] a:hover,
+[class*="fi-sidebar"] button:hover:not(.fi-sidebar-header button) {
+    background-color: #5c69ff !important;
+    color: #ffffff !important;
+}

@@ -1,0 +1,102 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\SelectionTestResource\Pages;
+use App\Filament\Resources\SelectionTestResource\RelationManagers;
+use App\Models\SelectionTest;
+use Filament\Forms;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class SelectionTestResource extends Resource
+{
+    protected static ?string $model = SelectionTest::class;
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-clipboard-document-check';
+    protected static string|\UnitEnum|null $navigationGroup = 'Recrutamento';
+    protected static ?string $modelLabel = 'Prova de Seleção';
+    protected static ?string $pluralModelLabel = 'Provas de Seleção';
+
+    public static function form(Schema $form): Schema
+    {
+        return $form
+            ->schema([
+                \Filament\Schemas\Components\Section::make('Configuração da Prova')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nome da Prova')
+                            ->required()
+                            ->maxLength(191),
+                        Forms\Components\Select::make('type')
+                            ->label('Tipo')
+                            ->options([
+                                'psicotecnico' => 'Psicotécnico',
+                                'fisico' => 'Físico',
+                                'conhecimento' => 'Cultura Geral',
+                                'saude' => 'Saúde',
+                            ])
+                            ->required(),
+                        Forms\Components\TextInput::make('order')
+                            ->label('Ordem de Execução')
+                            ->required()
+                            ->numeric()
+                            ->default(1),
+                    ])->columns(2),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('order')
+                    ->label('Ordem')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Nome')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('type')
+                    ->label('Tipo')
+                    ->badge(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Criada em')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                \Filament\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListSelectionTests::route('/'),
+            'create' => Pages\CreateSelectionTest::route('/create'),
+            'edit' => Pages\EditSelectionTest::route('/{record}/edit'),
+        ];
+    }
+}

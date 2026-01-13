@@ -1,0 +1,121 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\AcademicYearResource\Pages;
+use App\Filament\Resources\AcademicYearResource\RelationManagers;
+use App\Models\AcademicYear;
+use Filament\Forms;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class AcademicYearResource extends Resource
+{
+    protected static ?string $model = AcademicYear::class;
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-calendar-date-range';
+    protected static ?string $navigationLabel = 'Anos Académicos';
+    
+    public static function getModelLabel(): string
+    {
+        return 'Ano Académico';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Anos Académicos';
+    }
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Configurações';
+
+    public static function form(Schema $form): Schema
+    {
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('year')
+                    ->label('Ano')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('name')
+                    ->label('Descrição')
+                    ->required()
+                    ->maxLength(191),
+                Forms\Components\DatePicker::make('start_date')
+                    ->label('Data de Início')
+                    ->required(),
+                Forms\Components\DatePicker::make('end_date')
+                    ->label('Data de Término')
+                    ->required(),
+                Forms\Components\Toggle::make('is_active')
+                    ->label('Activo')
+                    ->default(true)
+                    ->required(),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('year')
+                    ->label('Ano')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Descrição')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('start_date')
+                    ->label('Início')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('end_date')
+                    ->label('Término')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label('Activo')
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Criado em')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                \Filament\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListAcademicYears::route('/'),
+            'create' => Pages\CreateAcademicYear::route('/create'),
+            'edit' => Pages\EditAcademicYear::route('/{record}/edit'),
+        ];
+    }
+}
+
