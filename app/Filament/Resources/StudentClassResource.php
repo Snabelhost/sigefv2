@@ -29,6 +29,7 @@ class StudentClassResource extends Resource
     }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
+    protected static ?int $navigationSort = 7;
 
     public static function form(Schema $form): Schema
     {

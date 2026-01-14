@@ -19,6 +19,7 @@ class EquipmentAssignmentResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-cube';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
+    protected static ?int $navigationSort = 5;
     protected static ?string $modelLabel = 'Atribuição de Meio';
     protected static ?string $pluralModelLabel = 'Atribuição de Meios';
 

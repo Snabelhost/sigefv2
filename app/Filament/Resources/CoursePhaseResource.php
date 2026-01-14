@@ -19,6 +19,7 @@ class CoursePhaseResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-signal';
     protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
+    protected static ?int $navigationSort = 3;
     protected static ?string $navigationLabel = 'Fases de Curso';
     protected static ?string $modelLabel = 'Fase de Curso';
     protected static ?string $pluralModelLabel = 'Fases de Curso';

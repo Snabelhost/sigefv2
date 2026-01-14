@@ -19,6 +19,7 @@ class CourseResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-rectangle-stack';
     protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
+    protected static ?int $navigationSort = 4;
     protected static ?string $modelLabel = 'Curso';
     protected static ?string $pluralModelLabel = 'Cursos';
 

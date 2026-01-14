@@ -19,6 +19,7 @@ class InstitutionTypeResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-squares-2x2';
     protected static string|\UnitEnum|null $navigationGroup = 'Configurações';
+    protected static ?int $navigationSort = 2;
     protected static ?string $navigationLabel = 'Tipos de Instituição';
     protected static ?string $modelLabel = 'Tipo de Instituição';
     protected static ?string $pluralModelLabel = 'Tipos de Instituição';

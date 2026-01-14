@@ -19,6 +19,7 @@ class TrainerResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-presentation-chart-bar';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
+    protected static ?int $navigationSort = 1;
     protected static ?string $modelLabel = 'Formador';
     protected static ?string $pluralModelLabel = 'Formadores';
     

@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Role;
 
 class RoleResource extends BaseRoleResource
 {
+    protected static ?int $navigationSort = 2;
     /**
      * Retorna o badge com o número de funções
      */

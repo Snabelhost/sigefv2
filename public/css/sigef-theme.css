@@ -450,6 +450,7 @@ button.fi-btn:hover {
     background-color: #5c69ff !important;
     color: #ffffff !important;
 }
+
 /* ========================================================================== */
 /* ===== MODO DARK - REMOVER CORES AZUIS CUSTOMIZADAS ===== */
 /* ===== Usa cores padrao do Filament no modo escuro ===== */
@@ -600,8 +601,8 @@ button.fi-btn:hover {
 /* Hover do menu lateral */
 .dark .fi-sidebar-item-button:hover,
 .dark .fi-sidebar-item a:hover,
-.dark .fi-sidebar-nav-item:hover > a,
-.dark .fi-sidebar-nav-item:hover > button,
+.dark .fi-sidebar-nav-item:hover>a,
+.dark .fi-sidebar-nav-item:hover>button,
 .dark [class*="fi-sidebar"] a:hover,
 .dark [class*="fi-sidebar"] button:hover:not(.brand-logo-btn) {
     background-color: #5c69ff !important;
@@ -828,8 +829,8 @@ button.fi-btn:hover {
 .dark .fi-header-icon,
 .dark .fi-resource-header-icon,
 .dark [class*="header-icon"],
-.dark .fi-page-header > div:first-child,
-.dark .fi-header > div > div:first-child {
+.dark .fi-page-header>div:first-child,
+.dark .fi-header>div>div:first-child {
     background-color: transparent !important;
     background: transparent !important;
 }
@@ -1255,4 +1256,131 @@ thead th input[type="checkbox"] {
 .fi-ta-header-adaptive-actions-position {
     background-color: transparent !important;
     background: transparent !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - REMOVER COR AZUL DO CABECALHO ===== */
+/* ========================================================================== */
+
+/* Cabecalho da tabela/grid - usar cor padrao no dark */
+.dark .fi-ta-header,
+.dark .fi-ta-header-cell,
+.dark thead tr,
+.dark table thead,
+.dark table thead tr,
+.dark .fi-table thead,
+.dark .fi-table thead tr {
+    background-color: inherit !important;
+}
+
+/* Texto do cabecalho - cor padrao no dark */
+.dark .fi-ta-header-cell,
+.dark .fi-ta-header-cell span,
+.dark .fi-ta-header-cell button,
+.dark .fi-ta-header-cell-label,
+.dark thead th,
+.dark thead th span,
+.dark thead th button,
+.dark .fi-table thead th {
+    color: inherit !important;
+}
+
+/* Icones de ordenacao - cor padrao no dark */
+.dark .fi-ta-header-cell svg,
+.dark thead th svg {
+    color: inherit !important;
+}
+
+/* Checkbox do cabecalho - cor padrao no dark */
+.dark .fi-ta-header-cell input[type="checkbox"],
+.dark thead th input[type="checkbox"] {
+    border-color: inherit !important;
+}
+
+/* Cabecalho do modal/formulario - cor padrao no dark */
+.dark .fi-modal-header {
+    background-color: inherit !important;
+}
+
+.dark .fi-modal-header .fi-modal-heading,
+.dark .fi-modal-header h2 {
+    color: inherit !important;
+}
+
+.dark .fi-modal-header button,
+.dark .fi-modal-header svg {
+    color: inherit !important;
+}
+
+/* ===== MODO DARK - FORCAR REMOCAO COR AZUL DO MODAL ===== */
+html.dark .fi-modal-header,
+html.dark .fi-modal .fi-modal-header,
+.dark .fi-modal-header,
+.dark .fi-modal .fi-modal-header {
+    background-color: rgb(31, 41, 55) !important;
+    background: rgb(31, 41, 55) !important;
+}
+
+html.dark .fi-modal-heading,
+html.dark .fi-modal-header .fi-modal-heading,
+html.dark .fi-modal-header h2,
+.dark .fi-modal-heading,
+.dark h2.fi-modal-heading {
+    color: rgb(255, 255, 255) !important;
+}
+
+html.dark .fi-modal-header button,
+html.dark .fi-modal-header button svg,
+.dark .fi-modal-header button,
+.dark .fi-modal-header button svg {
+    color: rgb(255, 255, 255) !important;
+}
+
+/* ===== MODO DARK - CABECALHO MODAL SEM FUNDO ===== */
+html.dark .fi-modal-header,
+html.dark .fi-modal .fi-modal-header,
+.dark .fi-modal-header,
+.dark .fi-modal .fi-modal-header {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* ========================================================================== */
+/* ===== MODO DARK - BADGE SIDEBAR AMARELO ===== */
+/* ========================================================================== */
+
+/* Badge de contagem na sidebar - amarelo no dark */
+.dark .fi-sidebar-item-badge-ctn,
+.dark .fi-sidebar-item-badge,
+.dark .fi-sidebar-nav .fi-badge,
+.dark .fi-sidebar-item-badge-ctn .fi-badge {
+    background-color: #fbbf24 !important;
+    color: #000000 !important;
+}
+
+.dark .fi-sidebar-item-badge-ctn span,
+.dark .fi-sidebar-item-badge span,
+.dark .fi-sidebar-nav .fi-badge span {
+    color: #000000 !important;
+}
+
+/* ===== MODO DARK - RADIO BUTTON AMARELO ===== */
+.dark .fi-sidebar-item-badge-ctn input[type="radio"],
+.dark .fi-radio,
+.dark input[type="radio"]:checked {
+    accent-color: #fbbf24 !important;
+    border-color: #fbbf24 !important;
+}
+
+.dark input[type="radio"]:checked {
+    background-color: #fbbf24 !important;
+}
+
+/* ===== MODO DARK - BADGE ARREDONDADO (PILL) ===== */
+.dark .fi-sidebar-item-badge-ctn,
+.dark .fi-sidebar-item-badge,
+.dark .fi-sidebar-nav .fi-badge,
+.dark .fi-sidebar-item-badge-ctn .fi-badge {
+    border-radius: 10px !important;
+    padding: 0.125rem 0.5rem !important;
 }

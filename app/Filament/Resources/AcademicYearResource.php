@@ -30,7 +30,8 @@ class AcademicYearResource extends Resource
         return 'Anos Académicos';
     }
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Configurações';
+    protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
+    protected static ?int $navigationSort = 0;
 
     public static function form(Schema $form): Schema
     {

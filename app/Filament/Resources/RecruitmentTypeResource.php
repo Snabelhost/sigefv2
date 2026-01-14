@@ -18,7 +18,8 @@ class RecruitmentTypeResource extends Resource
     protected static ?string $model = RecruitmentType::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-queue-list';
-    protected static string|\UnitEnum|null $navigationGroup = 'Recrutamento';
+    protected static string|\UnitEnum|null $navigationGroup = 'Configurações';
+    protected static ?int $navigationSort = 5;
     protected static ?string $modelLabel = 'Tipo de Recrutamento';
     protected static ?string $pluralModelLabel = 'Tipos de Recrutamento';
 

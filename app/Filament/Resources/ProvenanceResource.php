@@ -19,6 +19,7 @@ class ProvenanceResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-globe-alt';
     protected static string|\UnitEnum|null $navigationGroup = 'Configurações';
+    protected static ?int $navigationSort = 3;
     protected static ?string $navigationLabel = 'Proveniências';
     protected static ?string $modelLabel = 'Proveniência';
     protected static ?string $pluralModelLabel = 'Proveniências';

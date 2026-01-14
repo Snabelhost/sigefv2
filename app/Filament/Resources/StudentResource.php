@@ -17,18 +17,12 @@ class StudentResource extends Resource
 {
     protected static ?string $model = Student::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-user-circle';
-    public static function getModelLabel(): string
-    {
-        return 'Formando';
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return 'Formandos';
-    }
-
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-academic-cap';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
+    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationLabel = 'Instruendos';
+    protected static ?string $modelLabel = 'Instruendo';
+    protected static ?string $pluralModelLabel = 'Instruendos';
 
     // Eager loading para evitar problema N+1
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
@@ -160,18 +154,24 @@ class StudentResource extends Resource
                 //
             ])
             ->headerActions([
-                \Filament\Actions\CreateAction::make(),
+                \Filament\Actions\CreateAction::make()
+                    ->icon('heroicon-o-plus')
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Criar'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
+                    ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
+                    ->createAnother(true)
+                    ->successNotificationTitle('Registo criado com sucesso!'),
             ])
             ->actions([
                 \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
                 \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
-                Tables\Actions\Action::make('guiaMarcha')
+                \Filament\Actions\Action::make('guiaMarcha')
                     ->label('Guia de Marcha')
                     ->icon('heroicon-s-document-arrow-down')
                     ->color('success')
                     ->url(fn ($record) => route('reports.march-guide', $record))
                     ->openUrlInNewTab(),
-                Tables\Actions\Action::make('historico')
+                \Filament\Actions\Action::make('historico')
                     ->label('Histórico')
                     ->icon('heroicon-s-clipboard-document-list')
                     ->color('info')
@@ -199,5 +199,3 @@ class StudentResource extends Resource
         ];
     }
 }
-
-

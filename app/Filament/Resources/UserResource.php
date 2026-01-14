@@ -17,8 +17,9 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-cog-8-tooth';
-    protected static string|\UnitEnum|null $navigationGroup = 'Administração';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-users';
+    protected static string|\UnitEnum|null $navigationGroup = 'Gestão de Acesso';
+    protected static ?int $navigationSort = 1;
     protected static ?string $modelLabel = 'Utilizador';
     protected static ?string $pluralModelLabel = 'Utilizadores';
     
@@ -144,6 +145,3 @@ class UserResource extends Resource
         ];
     }
 }
-
-
-

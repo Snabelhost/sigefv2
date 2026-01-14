@@ -19,6 +19,7 @@ class CoursePlanResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-document-text';
     protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
+    protected static ?int $navigationSort = 2;
     protected static ?string $navigationLabel = 'Planos de Curso';
     protected static ?string $modelLabel = 'Plano de Curso';
     protected static ?string $pluralModelLabel = 'Planos de Curso';

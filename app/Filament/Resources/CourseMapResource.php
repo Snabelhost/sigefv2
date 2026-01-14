@@ -30,6 +30,7 @@ class CourseMapResource extends Resource
     }
 
     protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
+    protected static ?int $navigationSort = 1;
     
     public static function getEloquentQuery(): Builder
     {

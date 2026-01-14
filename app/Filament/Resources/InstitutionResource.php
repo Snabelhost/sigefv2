@@ -19,6 +19,7 @@ class InstitutionResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-building-library';
     protected static string|\UnitEnum|null $navigationGroup = 'Instituições';
+    protected static ?int $navigationSort = 1;
     protected static ?string $navigationLabel = 'Instituições';
     protected static ?string $modelLabel = 'Instituição';
     protected static ?string $pluralModelLabel = 'Instituições';

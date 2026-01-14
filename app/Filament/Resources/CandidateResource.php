@@ -18,17 +18,11 @@ class CandidateResource extends Resource
     protected static ?string $model = Candidate::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-user-plus';
-    public static function getModelLabel(): string
-    {
-        return 'Candidato';
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return 'Candidatos';
-    }
-
-    protected static string|\UnitEnum|null $navigationGroup = 'Recrutamento';
+    protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
+    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationLabel = 'Alistados';
+    protected static ?string $modelLabel = 'Alistado';
+    protected static ?string $pluralModelLabel = 'Alistados';
 
     // Eager loading para evitar problema N+1
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
@@ -213,6 +207,3 @@ class CandidateResource extends Resource
         ];
     }
 }
-
-
-

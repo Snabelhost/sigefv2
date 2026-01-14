@@ -18,7 +18,8 @@ class SelectionTestResource extends Resource
     protected static ?string $model = SelectionTest::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-clipboard-document-check';
-    protected static string|\UnitEnum|null $navigationGroup = 'Recrutamento';
+    protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
+    protected static ?int $navigationSort = 10;
     protected static ?string $modelLabel = 'Prova de Seleção';
     protected static ?string $pluralModelLabel = 'Provas de Seleção';
 
