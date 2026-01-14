@@ -17,6 +17,7 @@ class StudentLeaveResource extends Resource
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-calendar-days';
     protected static ?string $modelLabel = 'Dispensa/Falta';
     protected static ?string $pluralModelLabel = 'Dispensas';
+    protected static ?int $navigationSort = 9;
     
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

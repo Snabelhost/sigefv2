@@ -18,7 +18,7 @@ class CourseResource extends Resource
     protected static ?string $navigationLabel = 'Cursos';
     protected static ?string $modelLabel = 'Curso';
     protected static ?string $pluralModelLabel = 'Cursos';
-    protected static ?int $navigationSort = 0;
+    protected static ?int $navigationSort = 1;
     protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
 
     public static function form(Schema $form): Schema

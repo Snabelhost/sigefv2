@@ -18,7 +18,7 @@ class SelectionTestResource extends Resource
     protected static ?string $navigationLabel = 'Provas de Seleção';
     protected static ?string $modelLabel = 'Prova de Seleção';
     protected static ?string $pluralModelLabel = 'Provas de Seleção';
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 7;
 
     public static function form(Schema $form): Schema
     {

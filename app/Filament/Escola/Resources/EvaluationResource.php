@@ -17,6 +17,7 @@ class EvaluationResource extends Resource
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-document-check';
     protected static ?string $modelLabel = 'Avaliação';
     protected static ?string $pluralModelLabel = 'Avaliações';
+    protected static ?int $navigationSort = 6;
     
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

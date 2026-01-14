@@ -88,6 +88,10 @@ class EscolaPanelProvider extends PanelProvider
                 fn () => view('filament.header')
             )
             ->tenant(\App\Models\Institution::class)
+            ->navigationGroups([
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label('Currículo'),
+            ])
             ->discoverResources(in: app_path('Filament/Escola/Resources'), for: 'App\\Filament\\Escola\\Resources')
             ->discoverPages(in: app_path('Filament/Escola/Pages'), for: 'App\\Filament\\Escola\\Pages')
             ->pages([

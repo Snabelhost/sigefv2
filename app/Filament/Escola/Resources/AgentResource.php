@@ -19,7 +19,7 @@ class AgentResource extends Resource
     protected static ?string $navigationLabel = 'Agentes';
     protected static ?string $modelLabel = 'Agente';
     protected static ?string $pluralModelLabel = 'Agentes';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     // Filtrar apenas formandos com status "concluiu"
     public static function getEloquentQuery(): Builder

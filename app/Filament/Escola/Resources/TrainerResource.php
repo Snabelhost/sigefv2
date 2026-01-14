@@ -17,6 +17,7 @@ class TrainerResource extends Resource
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-user-group';
     protected static ?string $modelLabel = 'Formador';
     protected static ?string $pluralModelLabel = 'Formadores';
+    protected static ?int $navigationSort = 1;
     
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

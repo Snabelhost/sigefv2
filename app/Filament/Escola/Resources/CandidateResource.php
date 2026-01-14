@@ -18,7 +18,7 @@ class CandidateResource extends Resource
     protected static ?string $navigationLabel = 'Alistados';
     protected static ?string $modelLabel = 'Alistado';
     protected static ?string $pluralModelLabel = 'Alistados';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $form): Schema
     {
