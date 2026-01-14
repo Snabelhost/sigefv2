@@ -63,6 +63,7 @@ class InstitutionResource extends Resource
                 Tables\Columns\TextColumn::make('institutionType.name')
                     ->label('Tipo'),
             ])
+
             ->filters([
                 //
             ])

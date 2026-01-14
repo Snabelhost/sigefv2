@@ -1,47 +1,46 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Escola\Resources;
 
-use App\Filament\Resources\CourseResource\Pages;
-use App\Filament\Resources\CourseResource\RelationManagers;
+use App\Filament\Escola\Resources\CourseResource\Pages;
 use App\Models\Course;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-rectangle-stack';
-    protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
-    protected static ?int $navigationSort = 4;
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-academic-cap';
+    protected static ?string $navigationLabel = 'Cursos';
     protected static ?string $modelLabel = 'Curso';
     protected static ?string $pluralModelLabel = 'Cursos';
+    protected static ?int $navigationSort = 0;
+    protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
 
     public static function form(Schema $form): Schema
     {
         return $form
             ->schema([
-                \Filament\Schemas\Components\Section::make('Detalhes do Curso')
+                \Filament\Schemas\Components\Section::make('Informação do Curso')
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->label('Nome do Curso')
                             ->required()
                             ->maxLength(191),
-                        Forms\Components\TextInput::make('duration_months')
-                            ->label('Duração (Meses)')
-                            ->numeric(),
-                        Forms\Components\Toggle::make('has_phases')
-                            ->label('Possui Fases?')
-                            ->default(false),
                         Forms\Components\Textarea::make('description')
                             ->label('Descrição')
-                            ->columnSpanFull(),
+                            ->rows(3),
+                        Forms\Components\TextInput::make('duration_months')
+                            ->label('Duração (meses)')
+                            ->numeric()
+                            ->suffix('meses'),
+                        Forms\Components\Toggle::make('has_phases')
+                            ->label('Possui Fases')
+                            ->default(false),
                     ])->columns(2),
             ]);
     }
@@ -58,29 +57,17 @@ class CourseResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('duration_months')
                     ->label('Duração')
-                    ->suffix(' meses')
-                    ->sortable(),
+                    ->suffix(' meses'),
                 Tables\Columns\IconColumn::make('has_phases')
                     ->label('Fases')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Criado em')
-                    ->dateTime()
-                    ->sortable()
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Descrição')
+                    ->limit(50)
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
-            ->headerActions([
-                \Filament\Actions\CreateAction::make()
-                    ->icon('heroicon-o-plus')
-                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Criar'))
-                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
-                    ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
-                    ->createAnother(true)
-                    ->successNotificationTitle('Registo criado com sucesso!'),
-            ])
+
+            ->filters([])
             ->actions([
                 \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
                 \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
@@ -92,13 +79,6 @@ class CourseResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
@@ -106,6 +86,3 @@ class CourseResource extends Resource
         ];
     }
 }
-
-
-

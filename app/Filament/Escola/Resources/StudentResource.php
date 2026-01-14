@@ -15,8 +15,10 @@ class StudentResource extends Resource
     protected static ?string $model = Student::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-academic-cap';
-    protected static ?string $modelLabel = 'Formando';
-    protected static ?string $pluralModelLabel = 'Formandos';
+    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationLabel = 'Instruendos';
+    protected static ?string $modelLabel = 'Instruendo';
+    protected static ?string $pluralModelLabel = 'Instruendos';
     
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
@@ -125,6 +127,7 @@ class StudentResource extends Resource
                     ->date()
                     ->sortable(),
             ])
+
             ->filters([
                 //
             ])

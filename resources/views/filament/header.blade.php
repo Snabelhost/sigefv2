@@ -128,7 +128,6 @@
     </div>
     
     {{-- Lado Direito: Botão de criar --}}
-    <div id="sigef-actions-placeholder"></div>
 </div>
 
 <script>
@@ -223,43 +222,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function moveCreateButton() {
-        const fiHeader = document.querySelector('.fi-header');
-        const placeholder = document.getElementById('sigef-actions-placeholder');
-        
-        if (fiHeader && placeholder && placeholder.children.length === 0) {
-            const createBtn = fiHeader.querySelector('a[href*="/create"]');
-            if (createBtn) {
-                const btnText = createBtn.textContent.trim();
-                
-                const newBtn = document.createElement('a');
-                newBtn.href = createBtn.href;
-                newBtn.className = 'sigef-create-btn';
-                newBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    ${btnText}
-                `;
-                placeholder.appendChild(newBtn);
-            }
-        }
-    }
-    
     // Executar após o carregamento
     setTimeout(function() {
         updateDynamicHeader();
-        moveCreateButton();
     }, 100);
     
     setTimeout(function() {
         updateDynamicHeader();
-        moveCreateButton();
     }, 300);
     
     setTimeout(function() {
         updateDynamicHeader();
-        moveCreateButton();
     }, 600);
 });
 </script>

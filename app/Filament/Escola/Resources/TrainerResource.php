@@ -113,6 +113,7 @@ class TrainerResource extends Resource
                     ->label('Activo')
                     ->boolean(),
             ])
+
             ->filters([
                 //
             ])

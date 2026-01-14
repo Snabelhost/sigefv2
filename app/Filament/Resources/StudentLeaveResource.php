@@ -76,6 +76,8 @@ class StudentLeaveResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->deferLoading()
+            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('student.student_number')
                     ->label('Nº Ordem')

@@ -9,11 +9,22 @@ class Course extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'duration_months', 'has_phases'];
+    protected $fillable = [
+        'institution_id',
+        'name',
+        'description',
+        'duration_months',
+        'has_phases',
+    ];
 
     protected $casts = [
         'has_phases' => 'boolean',
     ];
+
+    public function institution()
+    {
+        return $this->belongsTo(Institution::class);
+    }
 
     public function phases()
     {

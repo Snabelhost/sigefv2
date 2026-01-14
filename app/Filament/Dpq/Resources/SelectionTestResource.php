@@ -69,6 +69,7 @@ class SelectionTestResource extends Resource
                 Tables\Columns\TextColumn::make('passing_score')
                     ->label('Pontuação Mín.'),
             ])
+
             ->filters([
                 //
             ])

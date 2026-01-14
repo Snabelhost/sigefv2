@@ -43,6 +43,8 @@ class RecruitmentTypeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->deferLoading()
+            ->striped()
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')

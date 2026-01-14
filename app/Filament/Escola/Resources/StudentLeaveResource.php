@@ -100,6 +100,7 @@ class StudentLeaveResource extends Resource
                         'danger' => 'rejected',
                     ]),
             ])
+
             ->filters([
                 //
             ])

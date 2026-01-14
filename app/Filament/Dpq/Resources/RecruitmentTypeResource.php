@@ -49,6 +49,7 @@ class RecruitmentTypeResource extends Resource
                     ->label('Descrição')
                     ->limit(50),
             ])
+
             ->filters([
                 //
             ])

@@ -64,6 +64,7 @@ class StudentClassResource extends Resource
                     ->label('Ano')
                     ->sortable(),
             ])
+
             ->filters([
                 //
             ])

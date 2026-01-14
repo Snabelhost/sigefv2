@@ -9,5 +9,15 @@ class SelectionTest extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'type', 'order'];
+    protected $fillable = [
+        'institution_id',
+        'name',
+        'type',
+        'order',
+    ];
+
+    public function institution()
+    {
+        return $this->belongsTo(Institution::class);
+    }
 }

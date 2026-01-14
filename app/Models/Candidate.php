@@ -10,6 +10,7 @@ class Candidate extends Model
     use HasFactory;
 
     protected $fillable = [
+        'institution_id',
         'recruitment_type_id',
         'full_name',
         'id_number',
@@ -34,6 +35,11 @@ class Candidate extends Model
         'birth_date' => 'date',
         'pna_entry_date' => 'date',
     ];
+
+    public function institution()
+    {
+        return $this->belongsTo(Institution::class);
+    }
 
     public function recruitmentType()
     {

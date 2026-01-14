@@ -102,6 +102,7 @@ class EvaluationResource extends Resource
                     ->label('Avaliador')
                     ->sortable(),
             ])
+
             ->filters([
                 //
             ])

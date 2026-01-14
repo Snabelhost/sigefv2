@@ -88,6 +88,7 @@ class EquipmentAssignmentResource extends Resource
                     ->sortable()
                     ->placeholder('Ainda com o formando'),
             ])
+
             ->filters([
                 //
             ])

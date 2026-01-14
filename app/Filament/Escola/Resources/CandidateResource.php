@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Dpq\Resources;
+namespace App\Filament\Escola\Resources;
 
-use App\Filament\Dpq\Resources\CandidateResource\Pages;
+use App\Filament\Escola\Resources\CandidateResource\Pages;
 use App\Models\Candidate;
 use Filament\Forms;
 use Filament\Schemas\Schema;
@@ -14,14 +14,11 @@ class CandidateResource extends Resource
 {
     protected static ?string $model = Candidate::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-identification';
-    protected static ?string $modelLabel = 'Candidato';
-    protected static ?string $pluralModelLabel = 'Candidatos';
-    
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
-    {
-        return parent::getEloquentQuery()->with(['recruitmentType', 'academicYear']);
-    }
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-user-plus';
+    protected static ?string $navigationLabel = 'Alistados';
+    protected static ?string $modelLabel = 'Alistado';
+    protected static ?string $pluralModelLabel = 'Alistados';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $form): Schema
     {
@@ -40,6 +37,7 @@ class CandidateResource extends Resource
                             ->maxLength(191),
                         Forms\Components\TextInput::make('id_number')
                             ->label('Nº do BI')
+                            ->unique(ignoreRecord: true)
                             ->required()
                             ->maxLength(191),
                         Forms\Components\DatePicker::make('birth_date')
@@ -52,14 +50,66 @@ class CandidateResource extends Resource
                                 'F' => 'Feminino',
                             ])
                             ->required(),
+                        Forms\Components\Select::make('marital_status')
+                            ->label('Estado Civil')
+                            ->options([
+                                'solteiro' => 'Solteiro(a)',
+                                'casado' => 'Casado(a)',
+                                'divorciado' => 'Divorciado(a)',
+                                'viuvo' => 'Viúvo(a)',
+                            ]),
                     ])->columns(2),
 
-                \Filament\Schemas\Components\Section::make('Processo de Recrutamento')
+                \Filament\Schemas\Components\Section::make('Habilitações e Proveniência')
                     ->schema([
+                        Forms\Components\TextInput::make('education_level')
+                            ->label('Nível Académico')
+                            ->placeholder('Ex: 12ª Classe, Licenciatura')
+                            ->maxLength(191),
+                        Forms\Components\TextInput::make('education_area')
+                            ->label('Área de Formação')
+                            ->maxLength(191),
+                        Forms\Components\Select::make('provenance_id')
+                            ->label('Proveniência')
+                            ->relationship('provenance', 'name')
+                            ->searchable()
+                            ->preload(),
+                        Forms\Components\Select::make('current_rank_id')
+                            ->label('Patente Actual')
+                            ->relationship('currentRank', 'name')
+                            ->searchable()
+                            ->preload(),
+                        Forms\Components\DatePicker::make('pna_entry_date')
+                            ->label('Data de Ingresso na PNA'),
+                    ])->columns(2),
+
+                \Filament\Schemas\Components\Section::make('Contacto e Processo')
+                    ->schema([
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Telefone')
+                            ->tel()
+                            ->maxLength(191),
+                        Forms\Components\TextInput::make('email')
+                            ->label('E-mail')
+                            ->email()
+                            ->maxLength(191),
+                        Forms\Components\TextInput::make('father_name')
+                            ->label('Nome do Pai')
+                            ->maxLength(191),
+                        Forms\Components\TextInput::make('mother_name')
+                            ->label('Nome da Mãe')
+                            ->maxLength(191),
                         Forms\Components\Select::make('recruitment_type_id')
                             ->label('Tipo de Recrutamento')
                             ->relationship('recruitmentType', 'name')
                             ->required()
+                            ->searchable()
+                            ->preload(),
+                        Forms\Components\Select::make('academic_year_id')
+                            ->label('Ano Académico')
+                            ->relationship('academicYear', 'year')
+                            ->required()
+                            ->searchable()
                             ->preload(),
                         Forms\Components\Select::make('status')
                             ->label('Estado do Processo')
@@ -71,11 +121,6 @@ class CandidateResource extends Resource
                             ])
                             ->required()
                             ->default('pending'),
-                        Forms\Components\Select::make('academic_year_id')
-                            ->label('Ano Académico')
-                            ->relationship('academicYear', 'year')
-                            ->required()
-                            ->preload(),
                     ])->columns(2),
             ]);
     }
@@ -99,6 +144,8 @@ class CandidateResource extends Resource
                 Tables\Columns\TextColumn::make('recruitmentType.name')
                     ->label('Recrutamento')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('gender')
+                    ->label('Género'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
                     ->colors([
@@ -109,24 +156,16 @@ class CandidateResource extends Resource
                     ]),
             ])
 
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
                 \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+                \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
                     \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array
