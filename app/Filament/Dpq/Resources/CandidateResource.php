@@ -112,9 +112,19 @@ class CandidateResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+            ->headerActions([
+                \Filament\Actions\CreateAction::make()
+                    ->icon('heroicon-o-plus')
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Criar'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
+                    ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
+                    ->createAnother(true)
+                    ->successNotificationTitle('Registo criado com sucesso!'),
             ])
+            ->actions([
+    \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+    \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
+])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
                     \Filament\Actions\DeleteBulkAction::make(),

@@ -27,6 +27,10 @@ class Institution extends Model
         'is_active' => 'boolean',
     ];
 
+    // ========================================
+    // Relação com o tipo de instituição
+    // ========================================
+    
     public function type()
     {
         return $this->belongsTo(InstitutionType::class, 'institution_type_id');
@@ -37,8 +41,71 @@ class Institution extends Model
         return $this->type();
     }
 
+    // ========================================
+    // Relação com utilizadores
+    // ========================================
+    
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    // ========================================
+    // Relações Multi-Tenancy (Painel Escola)
+    // ========================================
+
+    public function trainers()
+    {
+        return $this->hasMany(Trainer::class);
+    }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class);
+    }
+
+    public function candidates()
+    {
+        return $this->hasMany(Candidate::class);
+    }
+
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class);
+    }
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
+
+    public function selectionTests()
+    {
+        return $this->hasMany(SelectionTest::class);
+    }
+
+    public function evaluations()
+    {
+        return $this->hasMany(Evaluation::class);
+    }
+
+    public function studentClasses()
+    {
+        return $this->hasMany(StudentClass::class);
+    }
+
+    public function studentLeaves()
+    {
+        return $this->hasMany(StudentLeave::class);
+    }
+
+    public function equipmentAssignments()
+    {
+        return $this->hasMany(EquipmentAssignment::class);
+    }
+
+    public function academicYears()
+    {
+        return $this->hasMany(AcademicYear::class);
     }
 }

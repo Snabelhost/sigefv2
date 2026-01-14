@@ -28,22 +28,26 @@ class EscolaPanelProvider extends PanelProvider
             ->id('escola')
             ->path('escola')
             ->login(false) // Desabilitar login do painel - usar /login unificado
+            ->brandLogo(fn () => view('filament.brand-logo'))
+            ->brandLogoHeight('50px')
             ->sidebarCollapsibleOnDesktop()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchDebounce(500)
+            ->databaseNotifications()
+            ->defaultAvatarProvider(\App\Providers\CustomAvatarProvider::class)
             ->colors([
                 'primary' => [
-                    50 => '236, 239, 245',
-                    100 => '200, 210, 230',
-                    200 => '150, 170, 200',
-                    300 => '100, 130, 170',
-                    400 => '50, 90, 140',
-                    500 => '4, 24, 66',
-                    600 => '4, 24, 66',
-                    700 => '3, 20, 55',
-                    800 => '2, 15, 45',
-                    900 => '2, 12, 35',
-                    950 => '1, 8, 25',
+                    50 => '236, 239, 247',   // muito claro
+                    100 => '200, 210, 235',
+                    200 => '150, 170, 210',
+                    300 => '100, 130, 175',
+                    400 => '50, 80, 140',
+                    500 => '4, 28, 79',      // #041c4f base
+                    600 => '4, 28, 79',      // #041c4f
+                    700 => '3, 22, 65',
+                    800 => '2, 18, 50',
+                    900 => '2, 14, 40',
+                    950 => '1, 10, 30',
                 ],
             ])
             ->renderHook(
@@ -56,13 +60,16 @@ class EscolaPanelProvider extends PanelProvider
                     <link rel="apple-touch-icon" href="/favicon.png">
                     <script src="/js/favicon-inject.js"></script>
                     <script>
+                        // Remover botão nativo de colapso do Filament
                         document.addEventListener("DOMContentLoaded", function() {
                             function removeNativeCollapseButton() {
+                                // Procurar botões na sidebar header que não são nosso botão customizado
                                 const sidebarHeader = document.querySelector(".fi-sidebar-header");
                                 if (sidebarHeader) {
                                     const buttons = sidebarHeader.querySelectorAll("button:not(.brand-logo-btn)");
                                     buttons.forEach(function(btn) {
                                         if (!btn.classList.contains("brand-logo-btn")) {
+                                            btn.style.display = "none";
                                             btn.remove();
                                         }
                                     });
@@ -71,6 +78,7 @@ class EscolaPanelProvider extends PanelProvider
                             removeNativeCollapseButton();
                             setTimeout(removeNativeCollapseButton, 100);
                             setTimeout(removeNativeCollapseButton, 500);
+                            setTimeout(removeNativeCollapseButton, 1000);
                         });
                     </script>
                 '
@@ -101,7 +109,7 @@ class EscolaPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
-                // \\BezhanSalleh\\FilamentShield\\FilamentShieldPlugin::make(), // Temporariamente desabilitado para debug
+                // FilamentShield desabilitado - incompatível com multi-tenancy
             ])
             ->authMiddleware([
                 Authenticate::class, // Middleware customizado que redireciona para /login
@@ -109,4 +117,3 @@ class EscolaPanelProvider extends PanelProvider
             ]);
     }
 }
-

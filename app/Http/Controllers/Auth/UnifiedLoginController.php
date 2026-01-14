@@ -74,27 +74,30 @@ class UnifiedLoginController extends Controller
      */
     public function redirectToPanel($user)
     {
+        // Limpar sessão intended para evitar redirecionamentos para URLs antigas
+        session()->forget('url.intended');
+        
         // Prioridade 1: Super Admin
         if ($user->hasRole('super_admin')) {
-            return redirect()->intended('/admin');
+            return redirect('/admin');
         }
 
         // Prioridade 2: Escola (Multi-tenancy)
         if ($user->hasRole('escola_admin') || $user->hasRole('panel_user') || $user->hasRole('escola_user')) {
             if ($user->institution_id) {
-                return redirect()->intended('/escola/' . $user->institution_id);
+                return redirect('/escola/' . $user->institution_id);
             }
-            return redirect()->intended('/escola');
+            return redirect('/escola');
         }
 
         // Prioridade 3: DPQ
         if ($user->hasRole('dpq_admin') || $user->hasRole('dpq_user')) {
-            return redirect()->intended('/dpq');
+            return redirect('/dpq');
         }
 
         // Prioridade 4: Comando
         if ($user->hasRole('comando_admin') || $user->hasRole('comando_user')) {
-            return redirect()->intended('/comando');
+            return redirect('/comando');
         }
 
         // Fallback: Tentar encontrar qualquer painel que o utilizador possa aceder
@@ -104,9 +107,9 @@ class UnifiedLoginController extends Controller
                 $panel = \Filament\Facades\Filament::getPanel($panelId);
                 if ($user->canAccessPanel($panel)) {
                     if ($panelId === 'escola' && $user->institution_id) {
-                        return redirect()->intended('/escola/' . $user->institution_id);
+                        return redirect('/escola/' . $user->institution_id);
                     }
-                    return redirect()->intended('/' . $panelId);
+                    return redirect('/' . $panelId);
                 }
             } catch (\Exception $e) {
                 continue;

@@ -23,6 +23,7 @@ class TrainerResource extends Resource
         return parent::getEloquentQuery()->with(['rank']);
     }
 
+    // Reutiliza o mesmo form do Admin
     public static function form(Schema $form): Schema
     {
         return $form
@@ -84,6 +85,7 @@ class TrainerResource extends Resource
             ]);
     }
 
+    // Reutiliza o mesmo table do Admin (sem coluna de instituição)
     public static function table(Table $table): Table
     {
         return $table
@@ -113,12 +115,21 @@ class TrainerResource extends Resource
                     ->label('Activo')
                     ->boolean(),
             ])
-
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make()
+                    ->icon('heroicon-o-plus')
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Criar'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
+                    ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
+                    ->createAnother(true)
+                    ->successNotificationTitle('Registo criado com sucesso!'),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+                \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

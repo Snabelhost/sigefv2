@@ -25,26 +25,29 @@ class DpqPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            // Removed ->default() - Admin panel is the default
             ->id('dpq')
             ->path('dpq')
             ->login(false) // Desabilitar login do painel - usar /login unificado
+            ->brandLogo(fn () => view('filament.brand-logo'))
+            ->brandLogoHeight('50px')
             ->sidebarCollapsibleOnDesktop()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchDebounce(500)
+            ->databaseNotifications()
+            ->defaultAvatarProvider(\App\Providers\CustomAvatarProvider::class)
             ->colors([
                 'primary' => [
-                    50 => '236, 239, 245',
-                    100 => '200, 210, 230',
-                    200 => '150, 170, 200',
-                    300 => '100, 130, 170',
-                    400 => '50, 90, 140',
-                    500 => '4, 24, 66',
-                    600 => '4, 24, 66',
-                    700 => '3, 20, 55',
-                    800 => '2, 15, 45',
-                    900 => '2, 12, 35',
-                    950 => '1, 8, 25',
+                    50 => '236, 239, 247',   // muito claro
+                    100 => '200, 210, 235',
+                    200 => '150, 170, 210',
+                    300 => '100, 130, 175',
+                    400 => '50, 80, 140',
+                    500 => '4, 28, 79',      // #041c4f base
+                    600 => '4, 28, 79',      // #041c4f
+                    700 => '3, 22, 65',
+                    800 => '2, 18, 50',
+                    900 => '2, 14, 40',
+                    950 => '1, 10, 30',
                 ],
             ])
             ->renderHook(
@@ -57,13 +60,16 @@ class DpqPanelProvider extends PanelProvider
                     <link rel="apple-touch-icon" href="/favicon.png">
                     <script src="/js/favicon-inject.js"></script>
                     <script>
+                        // Remover botão nativo de colapso do Filament
                         document.addEventListener("DOMContentLoaded", function() {
                             function removeNativeCollapseButton() {
+                                // Procurar botões na sidebar header que não são nosso botão customizado
                                 const sidebarHeader = document.querySelector(".fi-sidebar-header");
                                 if (sidebarHeader) {
                                     const buttons = sidebarHeader.querySelectorAll("button:not(.brand-logo-btn)");
                                     buttons.forEach(function(btn) {
                                         if (!btn.classList.contains("brand-logo-btn")) {
+                                            btn.style.display = "none";
                                             btn.remove();
                                         }
                                     });
@@ -72,6 +78,7 @@ class DpqPanelProvider extends PanelProvider
                             removeNativeCollapseButton();
                             setTimeout(removeNativeCollapseButton, 100);
                             setTimeout(removeNativeCollapseButton, 500);
+                            setTimeout(removeNativeCollapseButton, 1000);
                         });
                     </script>
                 '
@@ -80,6 +87,14 @@ class DpqPanelProvider extends PanelProvider
                 PanelsRenderHook::CONTENT_START,
                 fn () => view('filament.header')
             )
+            ->navigationGroups([
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label('Painel de Controle'),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label('Recrutamento'),
+                \Filament\Navigation\NavigationGroup::make()
+                    ->label('Instituições'),
+            ])
             ->discoverResources(in: app_path('Filament/Dpq/Resources'), for: 'App\\Filament\\Dpq\\Resources')
             ->discoverPages(in: app_path('Filament/Dpq/Pages'), for: 'App\\Filament\\Dpq\\Pages')
             ->pages([
@@ -87,8 +102,7 @@ class DpqPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Dpq/Widgets'), for: 'App\\Filament\\Dpq\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                \App\Filament\Dpq\Widgets\DpqStatsOverview::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -102,7 +116,7 @@ class DpqPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
-                // \\BezhanSalleh\\FilamentShield\\FilamentShieldPlugin::make(), // Temporariamente desabilitado
+                // FilamentShield desabilitado - conflito de permissões
             ])
             ->authMiddleware([
                 Authenticate::class, // Middleware customizado que redireciona para /login
@@ -110,4 +124,3 @@ class DpqPanelProvider extends PanelProvider
             ]);
     }
 }
-
