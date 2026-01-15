@@ -18,6 +18,27 @@ class CandidateResource extends Resource
     protected static ?string $navigationLabel = 'Alistados';
     protected static ?string $modelLabel = 'Alistado';
     protected static ?string $pluralModelLabel = 'Alistados';
+
+    /**
+     * Badge com total de alistados da instituição
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        $tenant = \Filament\Facades\Filament::getTenant();
+        if ($tenant) {
+            return (string) \App\Models\Candidate::where('institution_id', $tenant->id)->count();
+        }
+        return null;
+    }
+
+    /**
+     * Cor do badge
+     */
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'primary';
+    }
+
     protected static ?int $navigationSort = 3;
 
     public static function form(Schema $form): Schema
@@ -130,6 +151,7 @@ class CandidateResource extends Resource
         return $table
             ->deferLoading()
             ->striped()
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\ImageColumn::make('photo')
                     ->label('Foto')
@@ -167,7 +189,11 @@ class CandidateResource extends Resource
                     ->successNotificationTitle('Registo criado com sucesso!'),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+                \Filament\Actions\EditAction::make()
+                    ->icon('heroicon-o-pencil-square')
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
+                    ->successNotificationTitle('Registo atualizado com sucesso!'),
                 \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([

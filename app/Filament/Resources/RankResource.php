@@ -31,9 +31,11 @@ class RankResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->label('Nome')
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(191),
                 Forms\Components\TextInput::make('acronym')
                     ->label('Sigla')
+                    ->unique(ignoreRecord: true)
                     ->maxLength(191),
                 Forms\Components\TextInput::make('order')
                     ->label('Ordem/Hierarquia')
@@ -48,6 +50,7 @@ class RankResource extends Resource
         return $table
             ->deferLoading()
             ->striped()
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
@@ -64,10 +67,6 @@ class RankResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -79,10 +78,15 @@ class RankResource extends Resource
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
                     ->createAnother(true)
-                    ->successNotificationTitle('Registo criado com sucesso!'),
+                    ->successNotificationTitle('Registo criado com sucesso!')
+                    ->label('Nova Patente'),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+                \Filament\Actions\EditAction::make()
+                    ->icon('heroicon-o-pencil-square')
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
+                    ->successNotificationTitle('Registo atualizado com sucesso!'),
                 \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([
@@ -106,6 +110,3 @@ class RankResource extends Resource
         ];
     }
 }
-
-
-

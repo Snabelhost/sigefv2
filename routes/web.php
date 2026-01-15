@@ -49,3 +49,24 @@ Route::middleware(['auth'])->prefix('reports')->name('reports.')->group(function
     Route::get('/absence-report/{institution}', [ReportController::class, 'absenceReport'])->name('absence-report');
     Route::get('/student-history/{student}', [ReportController::class, 'studentHistory'])->name('student-history');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Pautas - Impressão
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->prefix('pautas')->name('pauta.')->group(function () {
+    Route::get('/mini-pauta/print', [\App\Http\Controllers\PautaController::class, 'miniPautaPrint'])->name('mini-pauta.print');
+    Route::get('/pauta-geral/print', [\App\Http\Controllers\PautaController::class, 'pautaGeralPrint'])->name('pauta-geral.print');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Certificados
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->prefix('certificados')->name('certificados.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\CertificadoController::class, 'gerar'])->name('gerar');
+    Route::get('/individual/{student}', [\App\Http\Controllers\CertificadoController::class, 'individual'])->name('individual');
+    Route::get('/bulk', [\App\Http\Controllers\CertificadoController::class, 'bulk'])->name('bulk');
+});

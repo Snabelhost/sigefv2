@@ -20,8 +20,9 @@ class UserResource extends Resource
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-users';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão de Acesso';
     protected static ?int $navigationSort = 1;
-    protected static ?string $modelLabel = 'Utilizador';
-    protected static ?string $pluralModelLabel = 'Utilizadores';
+    protected static ?string $modelLabel = 'Agente';
+    protected static ?string $pluralModelLabel = 'Agentes';
+    protected static ?string $navigationLabel = 'Agentes';
     
     public static function getEloquentQuery(): Builder
     {
@@ -83,6 +84,7 @@ class UserResource extends Resource
         return $table
             ->deferLoading()
             ->striped()
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
@@ -118,10 +120,15 @@ class UserResource extends Resource
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
                     ->createAnother(true)
-                    ->successNotificationTitle('Registo criado com sucesso!'),
+                    ->successNotificationTitle('Registo criado com sucesso!')
+                    ->label('Novo Agente'),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+                \Filament\Actions\EditAction::make()
+                    ->icon('heroicon-o-pencil-square')
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
+                    ->successNotificationTitle('Registo atualizado com sucesso!'),
                 \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([
@@ -142,6 +149,8 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
+            'create' => Pages\CreateUser::route('/create'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

@@ -24,6 +24,22 @@ class CandidateResource extends Resource
     protected static ?string $modelLabel = 'Alistado';
     protected static ?string $pluralModelLabel = 'Alistados';
 
+    /**
+     * Badge com total de alistados
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) \App\Models\Candidate::count();
+    }
+
+    /**
+     * Cor do badge
+     */
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'primary';
+    }
+
     // Eager loading para evitar problema N+1
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
@@ -140,6 +156,7 @@ class CandidateResource extends Resource
         return $table
             ->deferLoading()
             ->striped()
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\ImageColumn::make('photo')
                     ->label('Foto')
@@ -183,7 +200,11 @@ class CandidateResource extends Resource
                     ->successNotificationTitle('Registo criado com sucesso!'),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+                \Filament\Actions\EditAction::make()
+                    ->icon('heroicon-o-pencil-square')
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
+                    ->successNotificationTitle('Registo atualizado com sucesso!'),
                 \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([

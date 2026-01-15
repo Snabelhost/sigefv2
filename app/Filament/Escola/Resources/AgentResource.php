@@ -70,6 +70,7 @@ class AgentResource extends Resource
         return $table
             ->deferLoading()
             ->striped()
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('student_number')
                     ->label('Nº Ordem')
@@ -101,7 +102,11 @@ class AgentResource extends Resource
                     ->successNotificationTitle('Registo criado com sucesso!'),
             ])
             ->actions([
-    \Filament\Actions\EditAction::make()->icon('heroicon-o-pencil-square'),
+    \Filament\Actions\EditAction::make()
+                    ->icon('heroicon-o-pencil-square')
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
+                    ->successNotificationTitle('Registo atualizado com sucesso!'),
     \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
 ])
             ->bulkActions([]);

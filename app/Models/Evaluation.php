@@ -64,6 +64,11 @@ class Evaluation extends Model
         return $this->belongsTo(CoursePhase::class, 'course_phase_id');
     }
 
+    public function coursePhase()
+    {
+        return $this->phase();
+    }
+
     public function evaluator()
     {
         return $this->belongsTo(User::class, 'evaluated_by');

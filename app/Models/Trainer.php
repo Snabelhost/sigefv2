@@ -13,6 +13,7 @@ class Trainer extends Model
         'institution_id',
         'full_name',
         'nip',
+        'bilhete',
         'gender',
         'rank_id',
         'organ',
@@ -40,5 +41,20 @@ class Trainer extends Model
     public function subjectAuthorizations()
     {
         return $this->hasMany(TrainerSubjectAuthorization::class);
+    }
+
+    public function classAssignments()
+    {
+        return $this->hasMany(TrainerClassAssignment::class);
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'trainer_class_assignments');
+    }
+
+    public function classes()
+    {
+        return $this->belongsToMany(StudentClass::class, 'trainer_class_assignments', 'trainer_id', 'class_id');
     }
 }
