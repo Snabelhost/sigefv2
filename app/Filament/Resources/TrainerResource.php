@@ -10,6 +10,8 @@ use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Closure;
@@ -207,7 +209,7 @@ class TrainerResource extends Resource
                     ->label('Bilhete')
                     ->searchable()
                     ->placeholder('-')
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('rank.name')
                     ->label('Patente')
                     ->sortable()
@@ -215,7 +217,7 @@ class TrainerResource extends Resource
                 Tables\Columns\TextColumn::make('institution.name')
                     ->label('Escola')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('trainer_type')
                     ->label('Tipo')
                     ->badge()
@@ -251,6 +253,80 @@ class TrainerResource extends Resource
                     ->label('Novo Formador'),
             ])
             ->actions([
+                \Filament\Actions\ViewAction::make()
+                    ->icon('heroicon-o-eye')
+                    ->modalHeading('Detalhes do Formador')
+                    ->schema([
+                        \Filament\Schemas\Components\Section::make()
+                            ->schema([
+                                \Filament\Schemas\Components\Grid::make(3)
+                                    ->schema([
+                                        \Filament\Schemas\Components\Group::make([
+                                            Infolists\Components\TextEntry::make('full_name')
+                                                ->label('Nome Completo')
+                                                ->weight('bold')
+                                                ->size('lg'),
+                                            Infolists\Components\TextEntry::make('trainer_type')
+                                                ->label('Tipo de Formador')
+                                                ->badge()
+                                                ->color(fn (?string $state): string => match ($state) {
+                                                    'Fardado' => 'primary',
+                                                    'Civil' => 'success',
+                                                    default => 'gray',
+                                                }),
+                                            Infolists\Components\TextEntry::make('gender')
+                                                ->label('Género'),
+                                            Infolists\Components\TextEntry::make('phone')
+                                                ->label('Telefone')
+                                                ->icon('heroicon-o-phone')
+                                                ->placeholder('Não informado'),
+                                        ])->columnSpan(1),
+                                        \Filament\Schemas\Components\Group::make([
+                                            Infolists\Components\TextEntry::make('nip')
+                                                ->label('NIP')
+                                                ->placeholder('N/A'),
+                                            Infolists\Components\TextEntry::make('bilhete')
+                                                ->label('Bilhete de Identidade')
+                                                ->placeholder('N/A'),
+                                            Infolists\Components\TextEntry::make('rank.name')
+                                                ->label('Patente')
+                                                ->placeholder('N/A'),
+                                            Infolists\Components\TextEntry::make('organ')
+                                                ->label('Órgão/Unidade')
+                                                ->placeholder('N/A'),
+                                            Infolists\Components\TextEntry::make('education_level')
+                                                ->label('Nível Académico')
+                                                ->placeholder('Não informado'),
+                                        ])->columnSpan(1),
+                                        \Filament\Schemas\Components\Group::make([
+                                            Infolists\Components\ImageEntry::make('photo')
+                                                ->label('Foto')
+                                                ->circular()
+                                                ->size(120)
+                                                ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->full_name ?? 'F') . '&background=0D47A1&color=fff&size=128'),
+                                            Infolists\Components\TextEntry::make('institution.name')
+                                                ->label('Instituição (Escola)')
+                                                ->icon('heroicon-o-building-library'),
+                                            Infolists\Components\IconEntry::make('is_active')
+                                                ->label('Estado')
+                                                ->boolean()
+                                                ->trueIcon('heroicon-o-check-circle')
+                                                ->falseIcon('heroicon-o-x-circle'),
+                                        ])->columnSpan(1),
+                                    ]),
+                            ]),
+                        \Filament\Schemas\Components\Section::make('Disciplinas que Lecciona')
+                            ->icon('heroicon-o-book-open')
+                            ->collapsible()
+                            ->schema([
+                                Infolists\Components\TextEntry::make('subjects.name')
+                                    ->label('')
+                                    ->badge()
+                                    ->color('info')
+                                    ->separator(', ')
+                                    ->placeholder('Nenhuma disciplina atribuída'),
+                            ]),
+                    ]),
                 \Filament\Actions\EditAction::make()
                     ->icon('heroicon-o-pencil-square')
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))

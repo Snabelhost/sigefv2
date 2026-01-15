@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'telcosms' => [
+        'api_key' => env('TELCOSMS_API_KEY', 'prd09933ffaa3022ca9d71dc39719'),
+        'api_url' => env('TELCOSMS_API_URL', 'https://telcosms.co.ao/send_message'),
+    ],
+
 ];

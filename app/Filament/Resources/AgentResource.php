@@ -9,12 +9,14 @@ use App\Models\Institution;
 use App\Models\Provenance;
 use App\Models\Rank;
 use App\Models\StudentType;
+use App\Services\SmsService;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+
 
 class AgentResource extends Resource
 {
@@ -28,11 +30,13 @@ class AgentResource extends Resource
     protected static ?string $pluralModelLabel = 'Agentes';
 
     /**
-     * Badge com total de agentes
+     * Badge com total de agentes do Curso Superior
      */
     public static function getNavigationBadge(): ?string
     {
-        return (string) Student::whereIn('status', ['em_formacao', 'concluiu'])->count();
+        return (string) Student::whereIn('status', ['em_formacao', 'concluiu'])
+            ->where('student_type', 'Formando Superior')
+            ->count();
     }
 
     /**
@@ -43,11 +47,12 @@ class AgentResource extends Resource
         return 'success';
     }
 
-    // Filtrar agentes (Em Formação ou Formação Concluída)
+    // Filtrar agentes (Em Formação ou Formação Concluída) que estão no Curso Superior
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->whereIn('status', ['em_formacao', 'concluiu'])
+            ->where('student_type', 'Formando Superior')
             ->with(['candidate', 'institution', 'currentPhase', 'provenance', 'rank']);
     }
 
@@ -122,20 +127,7 @@ class AgentResource extends Resource
                                     })
                                     ->helperText(fn ($get) => $get('cadastro_mode') === 'automatico' 
                                         ? 'Preenchido automaticamente pelo NIP' 
-                                        : 'Digite o nome completo do agente')
-                                    ->columnSpanFull(),
-
-                                // NIP - visível apenas no modo manual ou na edição
-                                Forms\Components\TextInput::make('nuri_manual')
-                                    ->label('NIP (Número de Identificação Policial)')
-                                    ->visible(fn ($get, $operation) => $get('cadastro_mode') === 'manual' || $operation === 'edit')
-                                    ->default(fn ($record) => $record?->nuri)
-                                    ->afterStateHydrated(function ($state, $set, $record) {
-                                        if ($record && !$state) {
-                                            $set('nuri_manual', $record->nuri);
-                                        }
-                                    })
-                                    ->maxLength(191),
+                                        : 'Digite o nome completo do agente'),
 
                                 Forms\Components\TextInput::make('student_number')
                                     ->label('Nº de Ordem')
@@ -161,16 +153,22 @@ class AgentResource extends Resource
                                     ->options(Rank::pluck('name', 'id'))
                                     ->searchable()
                                     ->preload(),
+
+                                Forms\Components\TextInput::make('phone')
+                                    ->label('Telefone')
+                                    ->tel()
+                                    ->prefix('+244')
+                                    ->placeholder('9XX XXX XXX')
+                                    ->mask('999 999 999')
+                                    ->maxLength(20),
                             ])->columns(2),
 
                         \Filament\Schemas\Components\Tabs\Tab::make('Informação Militar')
                             ->icon('heroicon-o-building-office')
                             ->schema([
-                                Forms\Components\Select::make('student_type')
-                                    ->label('Tipo de Aluno')
-                                    ->options(fn () => StudentType::where('is_active', true)->orderBy('order')->pluck('name', 'name')->toArray())
-                                    ->default(fn () => StudentType::where('is_active', true)->orderBy('order', 'desc')->value('name') ?? 'Formando Superior')
-                                    ->required(),
+                                // Tipo de Aluno definido automaticamente como Formando Superior
+                                Forms\Components\Hidden::make('student_type')
+                                    ->default('Formando Superior'),
 
                                 Forms\Components\Select::make('status')
                                     ->label('Estado')
@@ -232,7 +230,7 @@ class AgentResource extends Resource
                             ])->columns(2),
                     ])
                     ->columnSpanFull()
-                    ->persistTabInQueryString(),
+                    ->activeTab(1),
             ]);
     }
 
@@ -290,42 +288,69 @@ class AgentResource extends Resource
                 \Filament\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus')
                     ->mutateFormDataUsing(function (array $data): array {
-                        // Se modo manual, criar candidato primeiro
-                        if (isset($data['cadastro_mode']) && $data['cadastro_mode'] === 'manual' && !empty($data['full_name_manual'])) {
-                            // Obter o primeiro tipo de recrutamento disponível
-                            $recruitmentTypeId = \App\Models\RecruitmentType::first()?->id;
-                            
-                            // Verificar se já existe candidato com este NIP
-                            $nip = $data['nuri_manual'] ?? null;
-                            
+                        // Obter o primeiro tipo de recrutamento disponível
+                        $recruitmentTypeId = \App\Models\RecruitmentType::first()?->id;
+                        
+                        // Nome do agente (prioriza full_name_manual se disponível)
+                        $fullName = $data['full_name_manual'] ?? null;
+                        $nip = $data['nuri'] ?? $data['nuri_manual'] ?? null;
+                        
+                        // Se já tem candidate_id válido, usar esse
+                        if (!empty($data['candidate_id'])) {
+                            // Verificar se o candidato existe
+                            $existingCandidate = Candidate::find($data['candidate_id']);
+                            if ($existingCandidate) {
+                                // Usar o candidato existente
+                                unset($data['cadastro_mode']);
+                                unset($data['full_name_manual']);
+                                unset($data['nuri_manual']);
+                                unset($data['candidate_name_display']);
+                                return $data;
+                            }
+                        }
+                        
+                        // Se não tem candidate_id, precisamos criar um candidato
+                        if (empty($data['candidate_id']) && !empty($fullName)) {
                             if ($nip) {
                                 // Se tem NIP, buscar ou criar candidato
                                 $candidate = Candidate::firstOrCreate(
                                     ['id_number' => $nip],
                                     [
-                                        'full_name' => $data['full_name_manual'],
+                                        'full_name' => $fullName,
                                         'institution_id' => $data['institution_id'] ?? null,
                                         'provenance_id' => $data['provenance_id'] ?? null,
                                         'current_rank_id' => $data['rank_id'] ?? null,
                                         'recruitment_type_id' => $recruitmentTypeId,
+                                        'student_type' => 'Formando Superior', // Marcar como agente
                                         'status' => 'aprovado',
                                     ]
                                 );
                             } else {
                                 // Se não tem NIP, criar novo candidato
                                 $candidate = Candidate::create([
-                                    'full_name' => $data['full_name_manual'],
+                                    'full_name' => $fullName,
                                     'id_number' => null,
                                     'institution_id' => $data['institution_id'] ?? null,
                                     'provenance_id' => $data['provenance_id'] ?? null,
                                     'current_rank_id' => $data['rank_id'] ?? null,
                                     'recruitment_type_id' => $recruitmentTypeId,
+                                    'student_type' => 'Formando Superior', // Marcar como agente
                                     'status' => 'aprovado',
                                 ]);
                             }
                             
                             $data['candidate_id'] = $candidate->id;
                             $data['nuri'] = $nip;
+                        }
+                        
+                        // Se ainda não tem candidate_id, exibir erro e parar
+                        if (empty($data['candidate_id'])) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Erro ao criar agente')
+                                ->body('É necessário preencher o nome do agente para criar o cadastro.')
+                                ->danger()
+                                ->send();
+                            throw new \Filament\Support\Exceptions\Halt();
                         }
                         
                         // Remover campos temporários
@@ -335,6 +360,54 @@ class AgentResource extends Resource
                         unset($data['candidate_name_display']);
                         
                         return $data;
+                    })
+                    ->after(function ($record) {
+                        // Enviar SMS ao agente após a criação
+                        if (!empty($record->phone)) {
+                            try {
+                                $smsService = app(SmsService::class);
+                                
+                                // Obter o nome do agente
+                                $agentName = $record->candidate?->full_name ?? 'Agente';
+                                
+                                // Obter o nome da escola
+                                $schoolName = $record->institution?->name ?? 'Escola de Formação';
+                                
+                                // Enviar SMS de notificação
+                                $result = $smsService->sendAgentRegistrationNotification(
+                                    $record->phone,
+                                    $agentName,
+                                    $schoolName
+                                );
+                                
+                                if ($result['success']) {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('SMS Enviado')
+                                        ->body("SMS de notificação enviado para {$record->phone}")
+                                        ->success()
+                                        ->send();
+                                } else {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Falha ao enviar SMS')
+                                        ->body('Não foi possível enviar SMS. Verifique a chave API TelcoSMS e o saldo da conta. Detalhes: ' . ($result['message'] ?? 'Erro desconhecido'))
+                                        ->warning()
+                                        ->duration(8000)
+                                        ->send();
+                                }
+                            } catch (\Exception $e) {
+                                \Illuminate\Support\Facades\Log::error('Erro ao enviar SMS para agente', [
+                                    'agent_id' => $record->id,
+                                    'phone' => $record->phone,
+                                    'error' => $e->getMessage(),
+                                ]);
+                                
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Erro ao enviar SMS')
+                                    ->body('Ocorreu um erro ao tentar enviar o SMS')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }
                     })
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Criar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))

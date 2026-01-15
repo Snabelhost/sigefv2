@@ -24,10 +24,28 @@ class StudentResource extends Resource
     protected static ?string $modelLabel = 'Instruendo';
     protected static ?string $pluralModelLabel = 'Instruendos';
 
-    // Eager loading para evitar problema N+1
+    /**
+     * Badge com total de instruendos
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Student::whereIn('student_type', ['Instruendo', 'Recruta'])->count();
+    }
+
+    /**
+     * Cor do badge
+     */
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'info';
+    }
+
+    // Filtrar apenas Instruendos e Recrutas
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->with(['candidate', 'institution', 'currentPhase']);
+        return parent::getEloquentQuery()
+            ->whereIn('student_type', ['Instruendo', 'Recruta'])
+            ->with(['candidate', 'institution', 'currentPhase']);
     }
 
     public static function form(Schema $form): Schema

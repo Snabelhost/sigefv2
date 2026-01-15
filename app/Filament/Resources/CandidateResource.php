@@ -26,11 +26,11 @@ class CandidateResource extends Resource
     protected static ?string $pluralModelLabel = 'Alistados';
 
     /**
-     * Badge com total de alistados
+     * Badge com total de alistados (cadastrados neste formulário)
      */
     public static function getNavigationBadge(): ?string
     {
-        return (string) \App\Models\Candidate::count();
+        return (string) \App\Models\Candidate::where('student_type', 'Alistado')->count();
     }
 
     /**
@@ -41,10 +41,12 @@ class CandidateResource extends Resource
         return 'primary';
     }
 
-    // Eager loading para evitar problema N+1
+    // Filtrar apenas alistados cadastrados neste formulário
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->with(['recruitmentType', 'academicYear']);
+        return parent::getEloquentQuery()
+            ->where('student_type', 'Alistado')
+            ->with(['recruitmentType', 'academicYear']);
     }
 
     /**
@@ -138,8 +140,8 @@ class CandidateResource extends Resource
                             Forms\Components\Select::make('gender')
                                 ->label('Género')
                                 ->options([
-                                    'M' => 'Masculino',
-                                    'F' => 'Feminino',
+                                    'Masculino' => 'Masculino',
+                                    'Feminino' => 'Feminino',
                                 ])
                                 ->required(),
                             Forms\Components\Select::make('marital_status')
@@ -220,13 +222,9 @@ class CandidateResource extends Resource
                                 ->default(fn () => \App\Models\AcademicYear::where('is_active', true)->first()?->id)
                                 ->required(),
                             
-                            // Tipo de Aluno (movido de Dados Militares)
-                            Forms\Components\Select::make('student_type')
-                                ->label('Tipo de Aluno')
-                                ->options(fn () => self::getStudentTypeOptions())
-                                ->default('Alistado')
-                                ->required()
-                                ->columnSpanFull(),
+                            // Tipo de Aluno definido automaticamente como Alistado
+                            Forms\Components\Hidden::make('student_type')
+                                ->default('Alistado'),
                         ])->columns(2),
 
                     // Etapa 5 - Documentos

@@ -20,6 +20,7 @@ class Student extends Model
         'student_type_id',
         'status',
         'nuri',
+        'phone',
         'cia',
         'platoon',
         'section',
