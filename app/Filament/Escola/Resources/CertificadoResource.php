@@ -19,7 +19,7 @@ class CertificadoResource extends Resource
     protected static ?string $navigationLabel = 'Certificados';
     protected static ?string $modelLabel = 'Certificado';
     protected static ?string $pluralModelLabel = 'Certificados';
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 13;
 
     public static function getEloquentQuery(): Builder
     {

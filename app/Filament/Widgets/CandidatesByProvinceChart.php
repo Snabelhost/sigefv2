@@ -3,13 +3,15 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Candidate;
+use App\Models\Student;
+use App\Models\Institution;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
 class CandidatesByProvinceChart extends ChartWidget
 {
-    protected ?string $heading = 'Candidatos por Província';
+    protected ?string $heading = 'Alunos por Instituição de Ensino';
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
     protected ?string $pollingInterval = null; // Desativa polling automático
@@ -17,38 +19,58 @@ class CandidatesByProvinceChart extends ChartWidget
 
     protected function getData(): array
     {
-        // Forçamos a limpeza do cache para aplicar as novas cores transparentes
-        Cache::forget('candidates_by_province_chart');
+        // Limpar cache para refletir alterações
+        Cache::forget('students_by_institution_chart');
 
-        return Cache::remember('candidates_by_province_chart', 300, function () {
-            $data = Candidate::join('provenances', 'candidates.provenance_id', '=', 'provenances.id')
-                ->select('provenances.name', DB::raw('count(*) as total'))
-                ->groupBy('provenances.name')
-                ->orderByDesc('total')
-                ->limit(10)
-                ->get();
-
+        return Cache::remember('students_by_institution_chart', 300, function () {
+            // Obter todas as instituições
+            $institutions = Institution::all();
+            
+            $labels = [];
+            $totals = [];
+            
+            foreach ($institutions as $institution) {
+                // Contar Candidates desta instituição
+                $candidateCount = Candidate::where('institution_id', $institution->id)->count();
+                
+                // Contar Students desta instituição
+                $studentCount = Student::where('institution_id', $institution->id)->count();
+                
+                // Total de alunos
+                $total = $candidateCount + $studentCount;
+                
+                if ($total > 0) {
+                    $labels[] = $institution->name;
+                    $totals[] = $total;
+                }
+            }
+            
+            // Ordenar por total decrescente e limitar a 10
+            $combined = array_combine($labels, $totals);
+            arsort($combined);
+            $combined = array_slice($combined, 0, 10, true);
+            
             return [
                 'datasets' => [
                     [
-                        'label' => 'Candidatos',
-                        'data' => $data->pluck('total')->toArray(),
+                        'label' => 'Alunos',
+                        'data' => array_values($combined),
                         'backgroundColor' => [
-                            'rgba(252, 165, 165, 1)', // Rosa
-                            'rgba(253, 186, 116, 1)', // Laranja
-                            'rgba(253, 224, 71, 1)',  // Amarelo
-                            'rgba(110, 231, 183, 1)', // Verde
-                            'rgba(147, 197, 253, 1)', // Azul
-                            'rgba(167, 139, 250, 1)', // Roxo
-                            'rgba(244, 114, 182, 1)', // Rosa choque
-                            'rgba(45, 212, 191, 1)',  // Teal
-                            'rgba(251, 146, 60, 1)',  // Laranja forte
-                            'rgba(125, 211, 252, 1)', // Sky
+                            'rgba(59, 130, 246, 0.8)',   // Azul
+                            'rgba(16, 185, 129, 0.8)',  // Verde
+                            'rgba(245, 158, 11, 0.8)',  // Amarelo
+                            'rgba(239, 68, 68, 0.8)',   // Vermelho
+                            'rgba(139, 92, 246, 0.8)',  // Roxo
+                            'rgba(236, 72, 153, 0.8)',  // Rosa
+                            'rgba(20, 184, 166, 0.8)',  // Teal
+                            'rgba(249, 115, 22, 0.8)',  // Laranja
+                            'rgba(99, 102, 241, 0.8)',  // Indigo
+                            'rgba(34, 197, 94, 0.8)',   // Verde claro
                         ],
-                        'borderWidth' => 0, // Sem bordas conforme solicitado
+                        'borderWidth' => 0,
                     ],
                 ],
-                'labels' => $data->pluck('name')->toArray(),
+                'labels' => array_keys($combined),
             ];
         });
     }

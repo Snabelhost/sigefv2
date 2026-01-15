@@ -20,9 +20,25 @@ class UserResource extends Resource
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-users';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão de Acesso';
     protected static ?int $navigationSort = 1;
-    protected static ?string $modelLabel = 'Agente';
-    protected static ?string $pluralModelLabel = 'Agentes';
-    protected static ?string $navigationLabel = 'Agentes';
+    protected static ?string $modelLabel = 'Utilizador';
+    protected static ?string $pluralModelLabel = 'Utilizadores';
+    protected static ?string $navigationLabel = 'Utilizadores';
+
+    /**
+     * Badge com total de utilizadores
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) User::count();
+    }
+
+    /**
+     * Cor do badge
+     */
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'primary';
+    }
     
     public static function getEloquentQuery(): Builder
     {
@@ -33,7 +49,7 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                \Filament\Schemas\Components\Section::make('Informação da Conta')
+                \Filament\Schemas\Components\Section::make('Dados Pessoais')
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->label('Nome Completo')
@@ -45,19 +61,31 @@ class UserResource extends Resource
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(191),
-                        Forms\Components\TextInput::make('password')
-                            ->label('Palavra-passe')
-                            ->password()
-                            ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn (string $context): bool => $context === 'create')
-                            ->maxLength(191),
                         Forms\Components\TextInput::make('phone')
                             ->label('Telefone')
                             ->tel()
                             ->maxLength(191),
-                    ])->columns(2),
+                    ])->columns(3)->columnSpanFull(),
 
-                \Filament\Schemas\Components\Section::make('Permissões e Acesso')
+                \Filament\Schemas\Components\Section::make('Segurança')
+                    ->schema([
+                        Forms\Components\TextInput::make('password')
+                            ->label('Palavra-passe')
+                            ->password()
+                            ->revealable()
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $context): bool => $context === 'create')
+                            ->maxLength(191),
+                        Forms\Components\TextInput::make('password_confirmation')
+                            ->label('Confirmar Palavra-passe')
+                            ->password()
+                            ->revealable()
+                            ->same('password')
+                            ->requiredWith('password')
+                            ->maxLength(191),
+                    ])->columns(2)->columnSpanFull(),
+
+                \Filament\Schemas\Components\Section::make('Permissões')
                     ->schema([
                         Forms\Components\Select::make('institution_id')
                             ->label('Instituição/Escola')
@@ -74,8 +102,9 @@ class UserResource extends Resource
                         Forms\Components\Toggle::make('is_active')
                             ->label('Conta Activa')
                             ->default(true)
-                            ->required(),
-                    ])->columns(2),
+                            ->required()
+                            ->inline(false),
+                    ])->columns(3)->columnSpanFull(),
             ]);
     }
 
@@ -121,7 +150,7 @@ class UserResource extends Resource
                     ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
                     ->createAnother(true)
                     ->successNotificationTitle('Registo criado com sucesso!')
-                    ->label('Novo Agente'),
+                    ->label('Novo Utilizador'),
             ])
             ->actions([
                 \Filament\Actions\EditAction::make()
@@ -149,8 +178,6 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

@@ -17,7 +17,7 @@ class EquipmentAssignmentResource extends Resource
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-briefcase';
     protected static ?string $modelLabel = 'Atribuição de Meio';
     protected static ?string $pluralModelLabel = 'Atribuição de Meios';
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 8;
     
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

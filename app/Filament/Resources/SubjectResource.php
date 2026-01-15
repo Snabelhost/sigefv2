@@ -19,7 +19,7 @@ class SubjectResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-bookmark-square';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 8;
     protected static ?string $navigationLabel = 'Disciplinas';
     protected static ?string $modelLabel = 'Disciplina';
     protected static ?string $pluralModelLabel = 'Disciplinas';

@@ -13,22 +13,6 @@ use Illuminate\Support\Str;
 class RoleResource extends BaseRoleResource
 {
     protected static ?int $navigationSort = 2;
-    
-    /**
-     * Retorna o badge com o número de funções
-     */
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) Role::count();
-    }
-
-    /**
-     * Cor do badge
-     */
-    public static function getNavigationBadgeColor(): ?string
-    {
-        return 'primary';
-    }
 
     /**
      * Sobrescreve a tabela para adicionar o botão Criar no header

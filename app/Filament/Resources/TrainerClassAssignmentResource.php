@@ -21,7 +21,7 @@ class TrainerClassAssignmentResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-academic-cap';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
     protected static ?string $navigationLabel = 'Atribuição de Turmas';
     protected static ?string $modelLabel = 'Atribuição';
     protected static ?string $pluralModelLabel = 'Atribuições de Turmas';
@@ -185,6 +185,69 @@ class TrainerClassAssignmentResource extends Resource
                     ->successNotificationTitle('Atribuições criadas com sucesso!'),
             ])
             ->actions([
+                \Filament\Actions\Action::make('editarAtribuicoes')
+                    ->label('Editar')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('warning')
+                    ->modalHeading(fn (Trainer $record) => 'Editar Atribuições - ' . $record->full_name)
+                    ->form(function (Trainer $record) {
+                        $assignments = $record->classAssignments()->with(['subject', 'studentClass'])->get();
+                        
+                        return [
+                            Forms\Components\Repeater::make('assignments')
+                                ->label('Atribuições')
+                                ->schema([
+                                    Forms\Components\Select::make('class_id')
+                                        ->label('Turma')
+                                        ->options(
+                                            StudentClass::with('institution')
+                                                ->get()
+                                                ->mapWithKeys(fn ($class) => [$class->id => $class->name . ' - ' . ($class->institution->name ?? '')])
+                                        )
+                                        ->required()
+                                        ->searchable()
+                                        ->preload(),
+                                    Forms\Components\Select::make('subject_id')
+                                        ->label('Disciplina')
+                                        ->options(Subject::pluck('name', 'id'))
+                                        ->required()
+                                        ->searchable()
+                                        ->preload(),
+                                    Forms\Components\Toggle::make('is_active')
+                                        ->label('Activo')
+                                        ->default(true),
+                                ])
+                                ->columns(3)
+                                ->default($assignments->map(fn ($a) => [
+                                    'id' => $a->id,
+                                    'class_id' => $a->class_id,
+                                    'subject_id' => $a->subject_id,
+                                    'is_active' => $a->is_active,
+                                ])->toArray())
+                                ->addActionLabel('Adicionar Atribuição')
+                                ->reorderable(false)
+                                ->collapsible(),
+                        ];
+                    })
+                    ->action(function (Trainer $record, array $data): void {
+                        // Remover atribuições antigas
+                        $record->classAssignments()->delete();
+                        
+                        // Criar novas atribuições
+                        foreach ($data['assignments'] ?? [] as $assignment) {
+                            TrainerClassAssignment::create([
+                                'trainer_id' => $record->id,
+                                'class_id' => $assignment['class_id'],
+                                'subject_id' => $assignment['subject_id'],
+                                'is_active' => $assignment['is_active'] ?? true,
+                                'assigned_at' => now(),
+                                'assigned_by' => auth()->id(),
+                            ]);
+                        }
+                    })
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
+                    ->successNotificationTitle('Atribuições atualizadas com sucesso!'),
                 \Filament\Actions\Action::make('gerenciarDisciplinas')
                     ->label('Disciplinas')
                     ->icon('heroicon-o-academic-cap')

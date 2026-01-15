@@ -32,6 +32,10 @@ Route::get('/login', function () {
 
 Route::post('/login', [UnifiedLoginController::class, 'login']);
 
+Route::get('/select-panel', [UnifiedLoginController::class, 'showPanelSelection'])
+    ->middleware('auth')
+    ->name('select-panel');
+
 Route::post('/logout', [UnifiedLoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');

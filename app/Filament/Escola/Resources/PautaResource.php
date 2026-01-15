@@ -22,7 +22,7 @@ class PautaResource extends Resource
     protected static ?string $navigationLabel = 'Pautas';
     protected static ?string $modelLabel = 'Pauta';
     protected static ?string $pluralModelLabel = 'Pautas';
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 12;
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

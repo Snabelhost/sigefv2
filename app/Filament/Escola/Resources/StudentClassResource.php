@@ -17,7 +17,7 @@ class StudentClassResource extends Resource
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-users';
     protected static ?string $modelLabel = 'Turma';
     protected static ?string $pluralModelLabel = 'Turmas';
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 9;
     
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

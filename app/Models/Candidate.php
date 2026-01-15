@@ -29,6 +29,23 @@ class Candidate extends Model
         'photo',
         'status',
         'academic_year_id',
+        // Novos campos
+        'student_type',
+        'nuri',
+        'cia',
+        'platoon',
+        'section',
+        'province',
+        'municipality',
+        'province_id',
+        'municipality_id',
+        'address',
+        'bilhete_identidade',
+        'certificado_doc',
+        'curriculum',
+        'registro_criminal',
+        'carta_conducao',
+        'passaporte',
     ];
 
     protected $casts = [
@@ -74,5 +91,15 @@ class Candidate extends Model
     public function documents()
     {
         return $this->hasMany(CandidateDocument::class);
+    }
+
+    public function province()
+    {
+        return $this->belongsTo(Province::class);
+    }
+
+    public function municipalityRelation()
+    {
+        return $this->belongsTo(Municipality::class, 'municipality_id');
     }
 }

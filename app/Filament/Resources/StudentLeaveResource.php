@@ -19,7 +19,7 @@ class StudentLeaveResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-clock';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 10;
     protected static ?string $modelLabel = 'Dispensa/Falta';
     protected static ?string $pluralModelLabel = 'Dispensas';
 

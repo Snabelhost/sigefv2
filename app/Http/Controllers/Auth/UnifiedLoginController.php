@@ -70,6 +70,33 @@ class UnifiedLoginController extends Controller
     }
 
     /**
+     * Obter a lista de painéis que o utilizador pode aceder.
+     */
+    protected function getAccessiblePanels($user): array
+    {
+        $accessiblePanels = [];
+        $panels = [
+            'admin' => ['name' => 'Administração', 'icon' => 'heroicon-o-cog-6-tooth', 'url' => '/admin'],
+            'escola' => ['name' => 'Escola', 'icon' => 'heroicon-o-academic-cap', 'url' => $user->institution_id ? '/escola/' . $user->institution_id : '/escola'],
+            'dpq' => ['name' => 'DPQ', 'icon' => 'heroicon-o-building-office', 'url' => '/dpq'],
+            'comando' => ['name' => 'Comando', 'icon' => 'heroicon-o-shield-check', 'url' => '/comando'],
+        ];
+
+        foreach ($panels as $panelId => $panelInfo) {
+            try {
+                $panel = \Filament\Facades\Filament::getPanel($panelId);
+                if ($user->canAccessPanel($panel)) {
+                    $accessiblePanels[$panelId] = $panelInfo;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return $accessiblePanels;
+    }
+
+    /**
      * Redirecionar o utilizador para o painel correto baseado no role.
      */
     public function redirectToPanel($user)
@@ -77,43 +104,18 @@ class UnifiedLoginController extends Controller
         // Limpar sessão intended para evitar redirecionamentos para URLs antigas
         session()->forget('url.intended');
         
-        // Prioridade 1: Super Admin
-        if ($user->hasRole('super_admin')) {
-            return redirect('/admin');
+        // Obter painéis acessíveis
+        $accessiblePanels = $this->getAccessiblePanels($user);
+        
+        // Se o utilizador tem acesso a mais de um painel, mostrar página de selecção
+        if (count($accessiblePanels) > 1) {
+            return redirect('/select-panel');
         }
-
-        // Prioridade 2: Escola (Multi-tenancy)
-        if ($user->hasRole('escola_admin') || $user->hasRole('panel_user') || $user->hasRole('escola_user')) {
-            if ($user->institution_id) {
-                return redirect('/escola/' . $user->institution_id);
-            }
-            return redirect('/escola');
-        }
-
-        // Prioridade 3: DPQ
-        if ($user->hasRole('dpq_admin') || $user->hasRole('dpq_user')) {
-            return redirect('/dpq');
-        }
-
-        // Prioridade 4: Comando
-        if ($user->hasRole('comando_admin') || $user->hasRole('comando_user')) {
-            return redirect('/comando');
-        }
-
-        // Fallback: Tentar encontrar qualquer painel que o utilizador possa aceder
-        $panels = ['admin', 'escola', 'dpq', 'comando'];
-        foreach ($panels as $panelId) {
-            try {
-                $panel = \Filament\Facades\Filament::getPanel($panelId);
-                if ($user->canAccessPanel($panel)) {
-                    if ($panelId === 'escola' && $user->institution_id) {
-                        return redirect('/escola/' . $user->institution_id);
-                    }
-                    return redirect('/' . $panelId);
-                }
-            } catch (\Exception $e) {
-                continue;
-            }
+        
+        // Se tem acesso a apenas um painel, redirecionar diretamente
+        if (count($accessiblePanels) === 1) {
+            $panel = array_values($accessiblePanels)[0];
+            return redirect($panel['url']);
         }
 
         // Se não tiver acesso a nada, logout e erro
@@ -122,5 +124,25 @@ class UnifiedLoginController extends Controller
         return redirect('/login')->withErrors([
             'email' => 'A sua conta não tem permissões para aceder a nenhum painel. Contacte o administrador.',
         ]);
+    }
+
+    /**
+     * Mostrar página de selecção de painéis.
+     */
+    public function showPanelSelection()
+    {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        $user = Auth::user();
+        $accessiblePanels = $this->getAccessiblePanels($user);
+
+        // Se só tem 1 painel, redirecionar
+        if (count($accessiblePanels) <= 1) {
+            return $this->redirectToPanel($user);
+        }
+
+        return view('auth.select-panel', ['panels' => $accessiblePanels, 'user' => $user]);
     }
 }

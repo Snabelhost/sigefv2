@@ -7,59 +7,37 @@ use Filament\Widgets\ChartWidget;
 
 class StudentStatusChart extends ChartWidget
 {
-    protected ?string $heading = 'Estado dos Formandos';
+    protected ?string $heading = 'Formandos Aprovados e Reprovados';
     protected static ?int $sort = 4;
-
-    protected ?string $pollingInterval = null; // Desativa polling automático
+    protected ?string $pollingInterval = null;
     protected static bool $isLazy = true;
     
     protected function getData(): array
     {
-        $statusLabels = [
-            'alistado' => 'Alistados',
-            'frequenta' => 'Em Formação',
-            'concluiu' => 'Concluídos',
-            'desistiu' => 'Desistências',
-            'expulso' => 'Expulsos',
-        ];
+        // Contar aprovados/concluídos (inclui status positivos)
+        $aprovados = Student::whereIn('status', ['concluiu', 'formado', 'aprovado', 'frequenta', 'em_formacao'])->count();
         
-        $colors = [
-            'alistado' => 'rgba(253, 186, 116, 1)',  // Laranja
-            'frequenta' => 'rgba(147, 197, 253, 1)', // Azul
-            'concluiu' => 'rgba(110, 231, 183, 1)',  // Verde
-            'desistiu' => 'rgba(252, 165, 165, 1)',  // Vermelho/Rosa
-            'expulso' => 'rgba(244, 114, 182, 1)',   // Rosa choque
-        ];
+        // Contar reprovados/desistências (inclui status negativos)
+        $reprovados = Student::whereIn('status', ['reprovado', 'desistiu', 'expulso', 'transferido'])->count();
 
-        // Uma única query em vez de 5 queries separadas
-        $counts = Student::query()
-            ->selectRaw("status, COUNT(*) as total")
-            ->groupBy('status')
-            ->pluck('total', 'status')
-            ->toArray();
-
-        $data = [];
-        $labels = [];
-        $bgColors = [];
-
-        foreach ($statusLabels as $key => $label) {
-            if (isset($counts[$key]) && $counts[$key] > 0) {
-                $data[] = $counts[$key];
-                $labels[] = $label;
-                $bgColors[] = $colors[$key];
-            }
+        // Se não houver reprovados, definir um mínimo para visualização
+        if ($aprovados == 0 && $reprovados == 0) {
+            $aprovados = 1; // Valor mínimo para mostrar algo
         }
 
         return [
             'datasets' => [
                 [
                     'label' => 'Formandos',
-                    'data' => $data,
-                    'backgroundColor' => $bgColors,
+                    'data' => [$aprovados, $reprovados],
+                    'backgroundColor' => [
+                        'rgba(16, 185, 129, 0.9)',   // Verde - Aprovados/Em Formação
+                        'rgba(239, 68, 68, 0.9)',    // Vermelho - Reprovados/Desistências
+                    ],
                     'borderWidth' => 0,
                 ],
             ],
-            'labels' => $labels,
+            'labels' => ['Aprovados/Em Formação', 'Reprovados/Desistências'],
         ];
     }
 

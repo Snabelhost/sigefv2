@@ -33,17 +33,26 @@ class User extends Authenticatable implements FilamentUser, HasTenants
             return true;
         }
 
-        // Casos específicos legados ou personalizados
-        if ($panelId === 'escola' && ($this->hasRole('escola_admin') || $this->hasRole('panel_user'))) {
+        // Painel Admin - acesso para admin e panel_user
+        if ($panelId === 'admin' && ($this->hasRole('admin') || $this->hasRole('panel_user'))) {
             return true;
         }
 
+        // Painel Escola - precisa de institution_id e role adequado
+        if ($panelId === 'escola') {
+            if ($this->hasRole('escola_admin') || $this->hasRole('panel_user')) {
+                return $this->institution_id !== null;
+            }
+        }
+
+        // Painel DPQ
         if ($panelId === 'dpq' && $this->hasRole('dpq_admin')) {
-            return true;
+            return $this->institution_id !== null;
         }
 
+        // Painel Comando
         if ($panelId === 'comando' && $this->hasRole('comando_admin')) {
-            return true;
+            return $this->institution_id !== null;
         }
         
         return false;

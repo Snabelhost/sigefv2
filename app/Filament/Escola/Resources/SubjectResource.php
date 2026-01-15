@@ -18,7 +18,7 @@ class SubjectResource extends Resource
     protected static ?string $navigationLabel = 'Disciplinas';
     protected static ?string $modelLabel = 'Disciplina';
     protected static ?string $pluralModelLabel = 'Disciplinas';
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 8;
 
     public static function form(Schema $form): Schema
     {

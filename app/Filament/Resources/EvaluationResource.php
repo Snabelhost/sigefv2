@@ -19,7 +19,7 @@ class EvaluationResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-chart-bar-square';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
-    protected static ?int $navigationSort = 9;
+    protected static ?int $navigationSort = 11;
     protected static ?string $modelLabel = 'Avaliação';
     protected static ?string $pluralModelLabel = 'Avaliações';
     

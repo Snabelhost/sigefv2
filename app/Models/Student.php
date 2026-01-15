@@ -12,9 +12,12 @@ class Student extends Model
     protected $fillable = [
         'candidate_id',
         'institution_id',
+        'provenance_id',
+        'rank_id',
         'course_map_id',
         'student_number',
         'student_type',
+        'student_type_id',
         'status',
         'nuri',
         'cia',
@@ -22,10 +25,17 @@ class Student extends Model
         'section',
         'current_phase_id',
         'enrollment_date',
+        'conclusion_date',
+        'photo',
+        'bilhete_identidade',
+        'certificado_doc',
+        'carta_conducao',
+        'passaporte',
     ];
 
     protected $casts = [
         'enrollment_date' => 'date',
+        'conclusion_date' => 'date',
     ];
 
     public function candidate()
@@ -36,6 +46,16 @@ class Student extends Model
     public function institution()
     {
         return $this->belongsTo(Institution::class);
+    }
+
+    public function provenance()
+    {
+        return $this->belongsTo(Provenance::class);
+    }
+
+    public function rank()
+    {
+        return $this->belongsTo(Rank::class);
     }
 
     public function courseMap()
@@ -63,5 +83,57 @@ class Student extends Model
         return $this->belongsToMany(StudentClass::class, 'class_students', 'student_id', 'class_id')
                     ->withPivot('enrolled_at')
                     ->withTimestamps();
+    }
+
+    public function classEnrollments()
+    {
+        return $this->hasMany(StudentClassEnrollment::class);
+    }
+
+    public function subjectEnrollments()
+    {
+        return $this->hasMany(StudentSubjectEnrollment::class);
+    }
+
+    public function getFullNameAttribute()
+    {
+        return $this->candidate ? $this->candidate->full_name : 'N/A';
+    }
+
+    public function studentTypeRelation()
+    {
+        return $this->belongsTo(StudentType::class, 'student_type_id');
+    }
+
+    public function getStudentTypeLabel()
+    {
+        // Se tiver relação com StudentType, usa o nome da tabela
+        if ($this->studentTypeRelation) {
+            return $this->studentTypeRelation->name;
+        }
+
+        // Fallback para compatibilidade
+        return match($this->student_type) {
+            'Alistado' => 'Alistado',
+            'Recruta' => '1ª Fase - Recruta',
+            'Instruendo' => '2ª Fase - Instruendo',
+            'Agente' => 'Formado - Agente',
+            default => $this->student_type,
+        };
+    }
+
+    public function getStudentTypeColor()
+    {
+        if ($this->studentTypeRelation) {
+            return $this->studentTypeRelation->color;
+        }
+
+        return match($this->student_type) {
+            'Alistado' => 'gray',
+            'Recruta' => 'warning',
+            'Instruendo' => 'info',
+            'Agente' => 'success',
+            default => 'gray',
+        };
     }
 }
