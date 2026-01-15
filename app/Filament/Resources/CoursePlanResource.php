@@ -40,6 +40,14 @@ class CoursePlanResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload(),
+                Forms\Components\Select::make('subjects')
+                    ->label('Disciplinas')
+                    ->relationship('subjects', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->helperText('Selecione as disciplinas que farão parte deste plano')
+                    ->columnSpanFull(),
                 Forms\Components\Toggle::make('is_active')
                     ->label('Activo')
                     ->default(true)
@@ -60,15 +68,26 @@ class CoursePlanResource extends Resource
                 Tables\Columns\TextColumn::make('academicYear.year')
                     ->label('Ano')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('subjects.name')
+                    ->label('Disciplinas')
+                    ->badge()
+                    ->color(fn (string $state): string => match (crc32($state) % 6) {
+                        0 => 'primary',
+                        1 => 'success',
+                        2 => 'warning',
+                        3 => 'danger',
+                        4 => 'info',
+                        5 => 'gray',
+                        default => 'primary',
+                    })
+                    ->separator(', ')
+                    ->limitList(3)
+                    ->expandableLimitedList(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Activo')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Criado em')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -114,6 +133,3 @@ class CoursePlanResource extends Resource
         ];
     }
 }
-
-
-

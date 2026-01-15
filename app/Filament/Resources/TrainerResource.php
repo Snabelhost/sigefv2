@@ -33,87 +33,154 @@ class TrainerResource extends Resource
     {
         return $form
             ->schema([
-                \Filament\Schemas\Components\Section::make('Tipo de Formador')
-                    ->schema([
-                        Forms\Components\Select::make('trainer_type')
-                            ->label('Tipo de Formador')
-                            ->options([
-                                'Fardado' => 'Fardado',
-                                'Civil' => 'Civil',
-                            ])
-                            ->default('Fardado')
-                            ->required()
-                            ->live()
-                            ->columnSpan(2),
-                    ])->columns(2),
+                \Filament\Schemas\Components\Wizard::make([
+                    \Filament\Schemas\Components\Wizard\Step::make('Tipo')
+                        ->description('Selecione o tipo de formador')
+                        ->icon('heroicon-o-user-group')
+                        ->schema([
+                            Forms\Components\Select::make('trainer_type')
+                                ->label('Tipo de Formador')
+                                ->options([
+                                    'Fardado' => 'Fardado',
+                                    'Civil' => 'Civil',
+                                ])
+                                ->default('Fardado')
+                                ->required()
+                                ->live()
+                                ->columnSpanFull(),
+                        ]),
 
-                \Filament\Schemas\Components\Section::make('Identificação')
-                    ->schema([
-                        Forms\Components\FileUpload::make('photo')
-                            ->label('Foto')
-                            ->image()
-                            ->avatar()
-                            ->directory('trainers'),
-                        Forms\Components\TextInput::make('full_name')
-                            ->label('Nome Completo')
-                            ->required()
-                            ->maxLength(191),
-                        Forms\Components\Select::make('gender')
-                            ->label('Género')
-                            ->options([
-                                'Masculino' => 'Masculino',
-                                'Feminino' => 'Feminino',
-                            ])
-                            ->required(),
-                        Forms\Components\Select::make('institution_id')
-                            ->label('Instituição (Escola)')
-                            ->relationship('institution', 'name')
-                            ->required()
-                            ->searchable()
-                            ->preload(),
-                    ])->columns(2),
+                    \Filament\Schemas\Components\Wizard\Step::make('Identificação')
+                        ->description('Dados pessoais do formador')
+                        ->icon('heroicon-o-identification')
+                        ->schema([
+                            Forms\Components\FileUpload::make('photo')
+                                ->label('Foto')
+                                ->image()
+                                ->avatar()
+                                ->directory('trainers')
+                                ->columnSpanFull(),
+                            Forms\Components\TextInput::make('full_name')
+                                ->label('Nome Completo')
+                                ->required()
+                                ->maxLength(191),
+                            Forms\Components\Select::make('gender')
+                                ->label('Género')
+                                ->options([
+                                    'Masculino' => 'Masculino',
+                                    'Feminino' => 'Feminino',
+                                ])
+                                ->required(),
+                            Forms\Components\Select::make('institution_id')
+                                ->label('Instituição (Escola)')
+                                ->relationship('institution', 'name')
+                                ->required()
+                                ->searchable()
+                                ->preload(),
+                        ])->columns(2),
 
-                // Campos para Fardado
-                \Filament\Schemas\Components\Section::make('Dados do Fardado')
-                    ->schema([
-                        Forms\Components\TextInput::make('nip')
-                            ->label('NIP')
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(191),
-                        Forms\Components\Select::make('rank_id')
-                            ->label('Patente')
-                            ->relationship('rank', 'name')
-                            ->searchable()
-                            ->preload(),
-                        Forms\Components\TextInput::make('organ')
-                            ->label('Órgão/Unidade')
-                            ->maxLength(191),
-                    ])->columns(3)
-                    ->visible(fn ($get): bool => $get('trainer_type') === 'Fardado'),
+                    \Filament\Schemas\Components\Wizard\Step::make('Dados Profissionais')
+                        ->description('Informações profissionais')
+                        ->icon('heroicon-o-briefcase')
+                        ->schema([
+                            // Campos para Fardado
+                            \Filament\Schemas\Components\Fieldset::make('Dados do Fardado')
+                                ->schema([
+                                    Forms\Components\TextInput::make('nip')
+                                        ->label('NIP')
+                                        ->unique(ignoreRecord: true)
+                                        ->maxLength(191),
+                                    Forms\Components\Select::make('rank_id')
+                                        ->label('Patente')
+                                        ->relationship('rank', 'name')
+                                        ->searchable()
+                                        ->preload(),
+                                    Forms\Components\Select::make('organ')
+                                        ->label('Órgão/Unidade')
+                                        ->options([
+                                            'Comando Geral' => 'Comando Geral',
+                                            'Direcção de Pessoal e Quadros' => 'Direcção de Pessoal e Quadros',
+                                            'Direcção de Ordem Pública' => 'Direcção de Ordem Pública',
+                                            'Direcção de Investigação Criminal' => 'Direcção de Investigação Criminal',
+                                            'Direcção de Trânsito' => 'Direcção de Trânsito',
+                                            'Direcção de Protecção Pública' => 'Direcção de Protecção Pública',
+                                            'Direcção de Fronteiras' => 'Direcção de Fronteiras',
+                                            'Direcção de Logística' => 'Direcção de Logística',
+                                            'Direcção de Finanças' => 'Direcção de Finanças',
+                                            'Direcção de Saúde' => 'Direcção de Saúde',
+                                            'Direcção de Instrução e Ensino' => 'Direcção de Instrução e Ensino',
+                                            'Direcção de Comunicações' => 'Direcção de Comunicações',
+                                            'Gabinete de Estudos e Planeamento' => 'Gabinete de Estudos e Planeamento',
+                                            'Gabinete Jurídico' => 'Gabinete Jurídico',
+                                            'Gabinete de Intercâmbio' => 'Gabinete de Intercâmbio',
+                                            'Comando Provincial de Luanda' => 'Comando Provincial de Luanda',
+                                            'Comando Provincial de Benguela' => 'Comando Provincial de Benguela',
+                                            'Comando Provincial do Huambo' => 'Comando Provincial do Huambo',
+                                            'Comando Provincial de Cabinda' => 'Comando Provincial de Cabinda',
+                                            'Comando Provincial do Uíge' => 'Comando Provincial do Uíge',
+                                            'Comando Provincial do Zaire' => 'Comando Provincial do Zaire',
+                                            'Comando Provincial de Malanje' => 'Comando Provincial de Malanje',
+                                            'Comando Provincial da Lunda Norte' => 'Comando Provincial da Lunda Norte',
+                                            'Comando Provincial da Lunda Sul' => 'Comando Provincial da Lunda Sul',
+                                            'Comando Provincial do Moxico' => 'Comando Provincial do Moxico',
+                                            'Comando Provincial do Cuando Cubango' => 'Comando Provincial do Cuando Cubango',
+                                            'Comando Provincial da Huíla' => 'Comando Provincial da Huíla',
+                                            'Comando Provincial do Namibe' => 'Comando Provincial do Namibe',
+                                            'Comando Provincial do Cunene' => 'Comando Provincial do Cunene',
+                                            'Comando Provincial do Bié' => 'Comando Provincial do Bié',
+                                            'Comando Provincial do Cuanza Norte' => 'Comando Provincial do Cuanza Norte',
+                                            'Comando Provincial do Cuanza Sul' => 'Comando Provincial do Cuanza Sul',
+                                            'Comando Provincial do Bengo' => 'Comando Provincial do Bengo',
+                                        ])
+                                        ->searchable()
+                                        ->preload(),
+                                ])->columns(3)
+                                ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('trainer_type') === 'Fardado'),
 
-                // Campos para Civil
-                \Filament\Schemas\Components\Section::make('Dados do Civil')
-                    ->schema([
-                        Forms\Components\TextInput::make('bilhete')
-                            ->label('Bilhete de Identidade')
-                            ->maxLength(191),
-                    ])->columns(1)
-                    ->visible(fn ($get): bool => $get('trainer_type') === 'Civil'),
+                            // Campos para Civil
+                            \Filament\Schemas\Components\Fieldset::make('Dados do Civil')
+                                ->schema([
+                                    Forms\Components\TextInput::make('bilhete')
+                                        ->label('Bilhete de Identidade')
+                                        ->maxLength(191)
+                                        ->columnSpanFull(),
+                                ])->columns(1)
+                                ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('trainer_type') === 'Civil'),
+                        ]),
 
-                \Filament\Schemas\Components\Section::make('Informação Adicional')
-                    ->schema([
-                        Forms\Components\TextInput::make('education_level')
-                            ->label('Nível Académico')
-                            ->maxLength(191),
-                        Forms\Components\TextInput::make('phone')
-                            ->label('Telefone')
-                            ->tel()
-                            ->maxLength(191),
-                        Forms\Components\Toggle::make('is_active')
-                            ->label('Activo')
-                            ->default(true)
-                            ->required(),
-                    ])->columns(3),
+                    \Filament\Schemas\Components\Wizard\Step::make('Finalização')
+                        ->description('Informações adicionais')
+                        ->icon('heroicon-o-check-circle')
+                        ->schema([
+                            Forms\Components\Select::make('education_level')
+                                ->label('Nível Académico')
+                                ->options([
+                                    'Ensino Primário' => 'Ensino Primário',
+                                    '7ª Classe' => '7ª Classe',
+                                    '8ª Classe' => '8ª Classe',
+                                    '9ª Classe' => '9ª Classe',
+                                    '10ª Classe' => '10ª Classe',
+                                    '11ª Classe' => '11ª Classe',
+                                    '12ª Classe' => '12ª Classe',
+                                    'Ensino Médio Técnico' => 'Ensino Médio Técnico',
+                                    'Bacharelato' => 'Bacharelato',
+                                    'Licenciatura' => 'Licenciatura',
+                                    'Pós-Graduação' => 'Pós-Graduação',
+                                    'Mestrado' => 'Mestrado',
+                                    'Doutoramento' => 'Doutoramento',
+                                ])
+                                ->searchable()
+                                ->preload(),
+                            Forms\Components\TextInput::make('phone')
+                                ->label('Telefone')
+                                ->tel()
+                                ->maxLength(191),
+                            Forms\Components\Toggle::make('is_active')
+                                ->label('Activo')
+                                ->default(true)
+                                ->required(),
+                        ])->columns(3),
+                ])->columnSpanFull(),
             ]);
     }
 

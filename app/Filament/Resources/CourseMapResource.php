@@ -34,7 +34,7 @@ class CourseMapResource extends Resource
     
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['course', 'institution', 'academicYear']);
+        return parent::getEloquentQuery()->with(['course', 'institution']);
     }
 
     public static function form(Schema $form): Schema
@@ -53,20 +53,61 @@ class CourseMapResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload(),
-                Forms\Components\Select::make('academic_year_id')
-                    ->label('Ano Académico')
-                    ->relationship('academicYear', 'year')
-                    ->required()
+                Forms\Components\Select::make('organ')
+                    ->label('Órgão')
+                    ->options([
+                        'Comando Geral' => 'Comando Geral',
+                        'Direcção de Pessoal e Quadros' => 'Direcção de Pessoal e Quadros',
+                        'Direcção de Ordem Pública' => 'Direcção de Ordem Pública',
+                        'Direcção de Investigação Criminal' => 'Direcção de Investigação Criminal',
+                        'Direcção de Trânsito' => 'Direcção de Trânsito',
+                        'Direcção de Protecção Pública' => 'Direcção de Protecção Pública',
+                        'Direcção de Fronteiras' => 'Direcção de Fronteiras',
+                        'Direcção de Logística' => 'Direcção de Logística',
+                        'Direcção de Finanças' => 'Direcção de Finanças',
+                        'Direcção de Saúde' => 'Direcção de Saúde',
+                        'Direcção de Instrução e Ensino' => 'Direcção de Instrução e Ensino',
+                        'Direcção de Comunicações' => 'Direcção de Comunicações',
+                        'Gabinete de Estudos e Planeamento' => 'Gabinete de Estudos e Planeamento',
+                        'Gabinete Jurídico' => 'Gabinete Jurídico',
+                        'Gabinete de Intercâmbio' => 'Gabinete de Intercâmbio',
+                        'Comando Provincial de Luanda' => 'Comando Provincial de Luanda',
+                        'Comando Provincial de Benguela' => 'Comando Provincial de Benguela',
+                        'Comando Provincial do Huambo' => 'Comando Provincial do Huambo',
+                        'Comando Provincial de Cabinda' => 'Comando Provincial de Cabinda',
+                        'Comando Provincial do Uíge' => 'Comando Provincial do Uíge',
+                        'Comando Provincial do Zaire' => 'Comando Provincial do Zaire',
+                        'Comando Provincial de Malanje' => 'Comando Provincial de Malanje',
+                        'Comando Provincial da Lunda Norte' => 'Comando Provincial da Lunda Norte',
+                        'Comando Provincial da Lunda Sul' => 'Comando Provincial da Lunda Sul',
+                        'Comando Provincial do Moxico' => 'Comando Provincial do Moxico',
+                        'Comando Provincial do Cuando Cubango' => 'Comando Provincial do Cuando Cubango',
+                        'Comando Provincial da Huíla' => 'Comando Provincial da Huíla',
+                        'Comando Provincial do Namibe' => 'Comando Provincial do Namibe',
+                        'Comando Provincial do Cunene' => 'Comando Provincial do Cunene',
+                        'Comando Provincial do Bié' => 'Comando Provincial do Bié',
+                        'Comando Provincial do Cuanza Norte' => 'Comando Provincial do Cuanza Norte',
+                        'Comando Provincial do Cuanza Sul' => 'Comando Provincial do Cuanza Sul',
+                        'Comando Provincial do Bengo' => 'Comando Provincial do Bengo',
+                    ])
                     ->searchable()
                     ->preload(),
-                Forms\Components\TextInput::make('organ')
-                    ->label('Órgão')
-                    ->maxLength(191),
                 Forms\Components\TextInput::make('max_students')
                     ->label('Capacidade/Vagas')
                     ->required()
                     ->numeric()
                     ->default(0),
+                Forms\Components\DatePicker::make('start_date')
+                    ->label('Data de Início')
+                    ->required()
+                    ->native(false)
+                    ->displayFormat('d/m/Y'),
+                Forms\Components\DatePicker::make('end_date')
+                    ->label('Data do Fim')
+                    ->required()
+                    ->native(false)
+                    ->displayFormat('d/m/Y')
+                    ->afterOrEqual('start_date'),
                 Forms\Components\Toggle::make('is_active')
                     ->label('Activo')
                     ->default(true)
@@ -87,8 +128,13 @@ class CourseMapResource extends Resource
                 Tables\Columns\TextColumn::make('institution.acronym')
                     ->label('Instituição')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('academicYear.year')
-                    ->label('Ano')
+                Tables\Columns\TextColumn::make('start_date')
+                    ->label('Início')
+                    ->date('d/m/Y')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('end_date')
+                    ->label('Fim')
+                    ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('max_students')
                     ->label('Vagas')
@@ -99,13 +145,10 @@ class CourseMapResource extends Resource
                     ->boolean(),
                 Tables\Columns\TextColumn::make('organ')
                     ->label('Órgão')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Criado em')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -151,6 +194,3 @@ class CourseMapResource extends Resource
         ];
     }
 }
-
-
-

@@ -129,6 +129,18 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Papéis')
                     ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'super_admin' => 'danger',
+                        'admin' => 'warning',
+                        'escola_admin' => 'success',
+                        'dpq_admin' => 'info',
+                        'comando_admin' => 'primary',
+                        'panel_user' => 'gray',
+                        'escola_user' => 'success',
+                        'dpq_user' => 'info',
+                        'comando_user' => 'primary',
+                        default => 'gray',
+                    })
                     ->separator(','),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Activo')

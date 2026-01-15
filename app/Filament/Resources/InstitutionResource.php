@@ -57,17 +57,30 @@ class InstitutionResource extends Resource
                     ->email()
                     ->unique(ignoreRecord: true)
                     ->maxLength(191),
-                Forms\Components\TextInput::make('country')
-                    ->label('País')
-                    ->required()
-                    ->maxLength(191)
-                    ->default('Angola'),
-                Forms\Components\TextInput::make('province')
+                Forms\Components\Select::make('province')
                     ->label('Província')
-                    ->maxLength(191),
-                Forms\Components\TextInput::make('municipality')
+                    ->options(fn () => \App\Models\Province::orderBy('name')->pluck('name', 'name'))
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(fn (\Filament\Schemas\Components\Utilities\Set $set) => $set('municipality', null)),
+                Forms\Components\Select::make('municipality')
                     ->label('Município')
-                    ->maxLength(191),
+                    ->options(function (\Filament\Schemas\Components\Utilities\Get $get) {
+                        $provinceName = $get('province');
+                        if (!$provinceName) {
+                            return [];
+                        }
+                        $province = \App\Models\Province::where('name', $provinceName)->first();
+                        if (!$province) {
+                            return [];
+                        }
+                        return \App\Models\Municipality::where('province_id', $province->id)
+                            ->orderBy('name')
+                            ->pluck('name', 'name');
+                    })
+                    ->searchable()
+                    ->preload(),
                 Forms\Components\Textarea::make('address')
                     ->label('Endereço')
                     ->columnSpanFull(),
