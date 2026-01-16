@@ -346,6 +346,9 @@ class AgentResource extends Resource
                         unset($data['search_nip']);
                         unset($data['candidate_name_display']);
                         
+                        // Garantir enrollment_date
+                        $data['enrollment_date'] = $data['enrollment_date'] ?? now()->format('Y-m-d');
+                        
                         return $data;
                     })
                     ->after(function (Student $record) {
