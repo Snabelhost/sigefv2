@@ -119,10 +119,6 @@ class AgentResource extends Resource
                                     ->label('Nome Completo')
                                     ->required()
                                     ->maxLength(191)
-                                    ->unique(table: 'candidates', column: 'full_name', ignoreRecord: true)
-                                    ->validationMessages([
-                                        'unique' => 'Já existe um candidato/agente com este nome.',
-                                    ])
                                     ->default(fn ($record) => $record?->candidate?->full_name)
                                     ->afterStateHydrated(function ($state, $set, $record) {
                                         if ($record && !$state) {
