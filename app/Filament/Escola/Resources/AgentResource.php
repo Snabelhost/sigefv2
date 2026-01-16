@@ -237,19 +237,18 @@ class AgentResource extends Resource
                 Tables\Columns\TextColumn::make('candidate.full_name')
                     ->label('Nome')
                     ->formatStateUsing(function ($state, $record) {
-                        // Debug: verificar o que está chegando
+                        // Se tem state, usar diretamente
                         if ($state) {
                             return $state;
                         }
-                        // Se state está vazio, tentar acessar diretamente
+                        // Fallback: buscar diretamente pelo candidate_id
                         if ($record && $record->candidate_id) {
                             $candidate = \App\Models\Candidate::find($record->candidate_id);
                             if ($candidate) {
-                                return $candidate->full_name . ' (via fallback)';
+                                return $candidate->full_name;
                             }
-                            return 'candidate_id=' . $record->candidate_id . ' mas não encontrado';
                         }
-                        return 'candidate_id vazio';
+                        return '-';
                     })
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas('candidate', fn ($q) => $q->where('full_name', 'like', "%{$search}%"));
