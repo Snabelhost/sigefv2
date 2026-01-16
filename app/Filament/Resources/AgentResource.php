@@ -119,6 +119,10 @@ class AgentResource extends Resource
                                     ->label('Nome Completo')
                                     ->required()
                                     ->maxLength(191)
+                                    ->unique(table: 'candidates', column: 'full_name', ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Já existe um candidato/agente com este nome.',
+                                    ])
                                     ->default(fn ($record) => $record?->candidate?->full_name)
                                     ->afterStateHydrated(function ($state, $set, $record) {
                                         if ($record && !$state) {
@@ -128,6 +132,14 @@ class AgentResource extends Resource
                                     ->helperText(fn ($get) => $get('cadastro_mode') === 'automatico' 
                                         ? 'Preenchido automaticamente pelo NIP' 
                                         : 'Digite o nome completo do agente'),
+
+                                Forms\Components\TextInput::make('nuri')
+                                    ->label('NIP')
+                                    ->maxLength(50)
+                                    ->required()
+                                    ->unique(table: 'students', column: 'nuri', ignoreRecord: true)
+                                    ->default(fn ($record) => $record?->nuri)
+                                    ->helperText('Número de Identificação Policial'),
 
                                 Forms\Components\TextInput::make('student_number')
                                     ->label('Nº de Ordem')
@@ -146,13 +158,15 @@ class AgentResource extends Resource
                                     ->label('Proveniência (Órgão/Unidade)')
                                     ->options(Provenance::pluck('name', 'id'))
                                     ->searchable()
-                                    ->preload(),
+                                    ->preload()
+                                    ->required(),
 
                                 Forms\Components\Select::make('rank_id')
                                     ->label('Patente')
                                     ->options(Rank::pluck('name', 'id'))
                                     ->searchable()
-                                    ->preload(),
+                                    ->preload()
+                                    ->required(),
 
                                 Forms\Components\TextInput::make('phone')
                                     ->label('Telefone')
@@ -160,43 +174,14 @@ class AgentResource extends Resource
                                     ->prefix('+244')
                                     ->placeholder('9XX XXX XXX')
                                     ->mask('999 999 999')
-                                    ->maxLength(20),
-                            ])->columns(2),
-
-                        \Filament\Schemas\Components\Tabs\Tab::make('Informação Militar')
-                            ->icon('heroicon-o-building-office')
-                            ->schema([
-                                // Tipo de Aluno definido automaticamente como Formando Superior
+                                    ->maxLength(20)
+                                    ->required(),
+                                
+                                // Campos ocultos necessários
                                 Forms\Components\Hidden::make('student_type')
                                     ->default('Formando Superior'),
-
-                                Forms\Components\Select::make('status')
-                                    ->label('Estado')
-                                    ->options([
-                                        'em_formacao' => 'Em Formação',
-                                        'concluiu' => 'Formação Concluída',
-                                    ])
-                                    ->default('em_formacao')
-                                    ->required(),
-
-                                Forms\Components\TextInput::make('cia')
-                                    ->label('Companhia')
-                                    ->maxLength(191),
-
-                                Forms\Components\TextInput::make('platoon')
-                                    ->label('Pelotão')
-                                    ->maxLength(191),
-
-                                Forms\Components\TextInput::make('section')
-                                    ->label('Secção')
-                                    ->maxLength(191),
-
-                                Forms\Components\DatePicker::make('enrollment_date')
-                                    ->label('Data de Matrícula')
-                                    ->default(now()),
-
-                                Forms\Components\DatePicker::make('conclusion_date')
-                                    ->label('Data de Conclusão'),
+                                Forms\Components\Hidden::make('status')
+                                    ->default('em_formacao'),
                             ])->columns(2),
 
                         \Filament\Schemas\Components\Tabs\Tab::make('Foto')
@@ -266,9 +251,8 @@ class AgentResource extends Resource
                     ->label('Tipo')
                     ->badge()
                     ->color(fn ($state) => StudentType::where('name', $state)->value('color') ?? 'success'),
-                Tables\Columns\TextColumn::make('conclusion_date')
-                    ->label('Data de Conclusão')
-                    ->date('d/m/Y')
+                Tables\Columns\TextColumn::make('rank.name')
+                    ->label('Patente')
                     ->sortable()
                     ->placeholder('-'),
             ])
@@ -358,6 +342,9 @@ class AgentResource extends Resource
                         unset($data['full_name_manual']);
                         unset($data['nuri_manual']);
                         unset($data['candidate_name_display']);
+                        
+                        // Garantir valores padrão para campos obrigatórios
+                        $data['enrollment_date'] = $data['enrollment_date'] ?? now();
                         
                         return $data;
                     })

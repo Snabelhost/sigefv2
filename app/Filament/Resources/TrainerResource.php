@@ -65,7 +65,11 @@ class TrainerResource extends Resource
                             Forms\Components\TextInput::make('full_name')
                                 ->label('Nome Completo')
                                 ->required()
-                                ->maxLength(191),
+                                ->maxLength(191)
+                                ->unique(ignoreRecord: true)
+                                ->validationMessages([
+                                    'unique' => 'Já existe um formador com este nome.',
+                                ]),
                             Forms\Components\Select::make('gender')
                                 ->label('Género')
                                 ->options([
@@ -172,11 +176,16 @@ class TrainerResource extends Resource
                                     'Doutoramento' => 'Doutoramento',
                                 ])
                                 ->searchable()
-                                ->preload(),
+                                ->preload()
+                                ->required(),
                             Forms\Components\TextInput::make('phone')
                                 ->label('Telefone')
                                 ->tel()
-                                ->maxLength(191),
+                                ->prefix('+244')
+                                ->placeholder('9XX XXX XXX')
+                                ->mask('999 999 999')
+                                ->maxLength(191)
+                                ->required(),
                             Forms\Components\Toggle::make('is_active')
                                 ->label('Activo')
                                 ->default(true)

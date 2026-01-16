@@ -25,9 +25,9 @@ class StudentClassEnrollmentResource extends Resource
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-s-user-group';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestão Escolar';
     protected static ?int $navigationSort = 5;
-    protected static ?string $navigationLabel = 'Inscrições de Alunos';
-    protected static ?string $modelLabel = 'Inscrição';
-    protected static ?string $pluralModelLabel = 'Inscrições de Alunos';
+    protected static ?string $navigationLabel = 'Gestão de Formandos';
+    protected static ?string $modelLabel = 'Formando';
+    protected static ?string $pluralModelLabel = 'Gestão de Formandos';
     protected static ?string $slug = 'student-class-enrollments';
 
     /**
@@ -54,8 +54,9 @@ class StudentClassEnrollmentResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return Student::query()
+            ->whereHas('classEnrollments') // Mostrar apenas alunos com inscrições
             ->with(['candidate', 'institution', 'currentPhase', 'classEnrollments.studentClass', 'classEnrollments.coursePhase'])
-            ->withCount('classEnrollments');
+            ->withCount(['classEnrollments', 'subjectEnrollments']);
     }
 
     public static function form(Schema $form): Schema
@@ -138,14 +139,6 @@ class StudentClassEnrollmentResource extends Resource
                     ->label('Tipo')
                     ->badge()
                     ->color(fn ($state) => $typeColors[$state] ?? 'gray'),
-                Tables\Columns\TextColumn::make('institution.name')
-                    ->label('Instituição')
-                    ->sortable()
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('currentPhase.name')
-                    ->label('Fase Actual')
-                    ->sortable()
-                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('classEnrollments')
                     ->label('Turmas')
                     ->getStateUsing(fn (Student $record) => 
@@ -157,8 +150,8 @@ class StudentClassEnrollmentResource extends Resource
                     )
                     ->wrap()
                     ->placeholder('-'),
-                Tables\Columns\TextColumn::make('class_enrollments_count')
-                    ->label('Inscrições')
+                Tables\Columns\TextColumn::make('subject_enrollments_count')
+                    ->label('Total de Disciplinas')
                     ->badge()
                     ->color('primary')
                     ->sortable(),
@@ -179,58 +172,218 @@ class StudentClassEnrollmentResource extends Resource
                     ->label('Nova Inscrição')
                     ->modalHeading('Inscrever Aluno em Turma e Disciplinas')
                     ->form([
-                        Forms\Components\Select::make('student_id')
-                            ->label('Aluno')
-                            ->options(
-                                Student::with('candidate')
-                                    ->get()
-                                    ->mapWithKeys(fn ($student) => [
-                                        $student->id => ($student->candidate->full_name ?? 'N/A') . ' - ' . $student->student_number
-                                    ])
-                            )
-                            ->required()
-                            ->searchable()
-                            ->preload(),
-                        Forms\Components\Select::make('student_type')
-                            ->label('Tipo de Aluno')
-                            ->options(fn () => StudentType::where('is_active', true)->orderBy('order')->pluck('name', 'name')->toArray())
-                            ->required()
-                            ->live(),
-                        Forms\Components\Select::make('class_id')
-                            ->label('Turma')
-                            ->options(
-                                StudentClass::with('institution')
-                                    ->get()
-                                    ->mapWithKeys(fn ($class) => [$class->id => $class->name . ' - ' . ($class->institution->name ?? '')])
-                            )
-                            ->required()
-                            ->searchable()
-                            ->preload(),
-                        Forms\Components\Select::make('course_phase_id')
-                            ->label('Fase do Curso')
-                            ->options(CoursePhase::pluck('name', 'id'))
-                            ->searchable()
-                            ->preload(),
-                        Forms\Components\TextInput::make('classroom')
-                            ->label('Sala de Aula')
-                            ->maxLength(50),
-                        Forms\Components\Select::make('academic_year_id')
-                            ->label('Ano Académico')
-                            ->options(AcademicYear::where('is_active', true)->pluck('name', 'id'))
-                            ->searchable()
-                            ->preload(),
-                        Forms\Components\Select::make('subject_ids')
-                            ->label('Disciplinas')
-                            ->options(Subject::pluck('name', 'id'))
-                            ->multiple()
-                            ->searchable()
-                            ->preload(),
+                        \Filament\Schemas\Components\Wizard::make([
+                            // Etapa 1 - Dados do Aluno
+                            \Filament\Schemas\Components\Wizard\Step::make('Dados do Aluno')
+                                ->icon('heroicon-o-user')
+                                ->description('Seleccione o aluno')
+                                ->schema([
+                                    Forms\Components\Select::make('student_id')
+                                        ->label('Aluno')
+                                        ->options(function () {
+                                            return Student::with(['candidate', 'classEnrollments.studentClass'])
+                                                ->get()
+                                                ->mapWithKeys(function ($student) {
+                                                    $name = $student->candidate->full_name ?? 'N/A';
+                                                    $number = $student->student_number;
+                                                    $enrollmentCount = $student->classEnrollments->count();
+                                                    
+                                                    // Adicionar indicador se já tem inscrições
+                                                    $indicator = $enrollmentCount > 0 
+                                                        ? " ✓ ({$enrollmentCount} inscrição(ões))" 
+                                                        : " ○ (Sem inscrição)";
+                                                    
+                                                    return [$student->id => $name . ' - ' . $number . $indicator];
+                                                });
+                                        })
+                                        ->required()
+                                        ->searchable()
+                                        ->preload()
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, $set) {
+                                            if ($state) {
+                                                $student = Student::with('classEnrollments.studentClass')->find($state);
+                                                if ($student) {
+                                                    // Preencher tipo de aluno
+                                                    $set('student_type', $student->student_type);
+                                                    // Preencher NIP se existir
+                                                    $set('nip_display', $student->nuri);
+                                                    // Informação de inscrições existentes
+                                                    $enrollments = $student->classEnrollments;
+                                                    if ($enrollments->count() > 0) {
+                                                        $classes = $enrollments->map(fn($e) => $e->studentClass->name ?? 'N/A')->implode(', ');
+                                                        $set('enrollment_info', "⚠️ Já inscrito em: {$classes}");
+                                                    } else {
+                                                        $set('enrollment_info', '✅ Sem inscrições anteriores');
+                                                    }
+                                                }
+                                            }
+                                        })
+                                        ->columnSpanFull(),
+                                    // Informação de inscrições existentes
+                                    Forms\Components\Placeholder::make('enrollment_info')
+                                        ->label('Estado de Inscrição')
+                                        ->content(fn ($get) => $get('enrollment_info') ?? 'Seleccione um aluno')
+                                        ->columnSpanFull(),
+                                    Forms\Components\Select::make('student_type')
+                                        ->label('Tipo de Aluno')
+                                        ->options(fn () => StudentType::where('is_active', true)->orderBy('order')->pluck('name', 'name')->toArray())
+                                        ->required()
+                                        ->live(),
+                                    // Campo NIP para Agentes/Formando Superior (só leitura)
+                                    Forms\Components\TextInput::make('nip_display')
+                                        ->label('NIP')
+                                        ->disabled()
+                                        ->dehydrated(false)
+                                        ->visible(fn ($get) => in_array($get('student_type'), ['Formando Superior', 'Agente']))
+                                        ->helperText('Preenchido automaticamente'),
+                                    // Campo NURI para outros tipos
+                                    Forms\Components\TextInput::make('nuri')
+                                        ->label('NURI')
+                                        ->maxLength(50)
+                                        ->visible(fn ($get) => !in_array($get('student_type'), ['Formando Superior', 'Agente'])),
+                                ])->columns(2),
+                            
+                            // Etapa 2 - Unidade Militar
+                            \Filament\Schemas\Components\Wizard\Step::make('Unidade Militar')
+                                ->icon('heroicon-o-building-office')
+                                ->description('Informação da unidade')
+                                ->schema([
+                                    Forms\Components\Select::make('cia')
+                                        ->label('Companhia')
+                                        ->options([
+                                            '1ª Companhia' => '1ª Companhia',
+                                            '2ª Companhia' => '2ª Companhia',
+                                            '3ª Companhia' => '3ª Companhia',
+                                            '4ª Companhia' => '4ª Companhia',
+                                            '5ª Companhia' => '5ª Companhia',
+                                            '6ª Companhia' => '6ª Companhia',
+                                            '7ª Companhia' => '7ª Companhia',
+                                            '8ª Companhia' => '8ª Companhia',
+                                            '9ª Companhia' => '9ª Companhia',
+                                            '10ª Companhia' => '10ª Companhia',
+                                            '11ª Companhia' => '11ª Companhia',
+                                            '12ª Companhia' => '12ª Companhia',
+                                            '13ª Companhia' => '13ª Companhia',
+                                            '14ª Companhia' => '14ª Companhia',
+                                            '15ª Companhia' => '15ª Companhia',
+                                            'Companhia de Comando' => 'Companhia de Comando',
+                                            'Companhia de Apoio' => 'Companhia de Apoio',
+                                        ])
+                                        ->searchable()
+                                        ->preload()
+                                        ->required(),
+                                    Forms\Components\Select::make('platoon')
+                                        ->label('Pelotão')
+                                        ->options([
+                                            '1º Pelotão' => '1º Pelotão',
+                                            '2º Pelotão' => '2º Pelotão',
+                                            '3º Pelotão' => '3º Pelotão',
+                                            '4º Pelotão' => '4º Pelotão',
+                                            '5º Pelotão' => '5º Pelotão',
+                                            '6º Pelotão' => '6º Pelotão',
+                                            '7º Pelotão' => '7º Pelotão',
+                                            '8º Pelotão' => '8º Pelotão',
+                                            '9º Pelotão' => '9º Pelotão',
+                                            '10º Pelotão' => '10º Pelotão',
+                                            '11º Pelotão' => '11º Pelotão',
+                                            '12º Pelotão' => '12º Pelotão',
+                                            '13º Pelotão' => '13º Pelotão',
+                                            '14º Pelotão' => '14º Pelotão',
+                                            '15º Pelotão' => '15º Pelotão',
+                                        ])
+                                        ->searchable()
+                                        ->preload()
+                                        ->required(),
+                                    Forms\Components\Select::make('section')
+                                        ->label('Secção')
+                                        ->options([
+                                            '1ª Secção' => '1ª Secção',
+                                            '2ª Secção' => '2ª Secção',
+                                            '3ª Secção' => '3ª Secção',
+                                            '4ª Secção' => '4ª Secção',
+                                            '5ª Secção' => '5ª Secção',
+                                            '6ª Secção' => '6ª Secção',
+                                            '7ª Secção' => '7ª Secção',
+                                            '8ª Secção' => '8ª Secção',
+                                            '9ª Secção' => '9ª Secção',
+                                            '10ª Secção' => '10ª Secção',
+                                            '11ª Secção' => '11ª Secção',
+                                            '12ª Secção' => '12ª Secção',
+                                            '13ª Secção' => '13ª Secção',
+                                            '14ª Secção' => '14ª Secção',
+                                            '15ª Secção' => '15ª Secção',
+                                        ])
+                                        ->searchable()
+                                        ->preload()
+                                        ->required(),
+                                ])->columns(3),
+                            
+                            // Etapa 3 - Informação Académica
+                            \Filament\Schemas\Components\Wizard\Step::make('Informação Académica')
+                                ->icon('heroicon-o-academic-cap')
+                                ->description('Turma e dados académicos')
+                                ->schema([
+                                    Forms\Components\Select::make('class_id')
+                                        ->label('Turma')
+                                        ->options(
+                                            StudentClass::with('institution')
+                                                ->get()
+                                                ->mapWithKeys(fn ($class) => [$class->id => $class->name . ' - ' . ($class->institution->name ?? '')])
+                                        )
+                                        ->required()
+                                        ->searchable()
+                                        ->preload(),
+                                    Forms\Components\Select::make('course_phase_id')
+                                        ->label('Fase do Curso')
+                                        ->options(CoursePhase::pluck('name', 'id'))
+                                        ->searchable()
+                                        ->preload()
+                                        ->required(),
+                                    Forms\Components\TextInput::make('classroom')
+                                        ->label('Sala de Aula')
+                                        ->maxLength(50)
+                                        ->required(),
+                                    Forms\Components\Select::make('academic_year_id')
+                                        ->label('Ano Académico')
+                                        ->options(AcademicYear::where('is_active', true)->pluck('name', 'id'))
+                                        ->searchable()
+                                        ->preload()
+                                        ->required(),
+                                    Forms\Components\DatePicker::make('enrollment_date')
+                                        ->label('Data de Matrícula')
+                                        ->default(now())
+                                        ->required(),
+                                ])->columns(2),
+                            
+                            // Etapa 4 - Disciplinas
+                            \Filament\Schemas\Components\Wizard\Step::make('Disciplinas')
+                                ->icon('heroicon-o-book-open')
+                                ->description('Seleccione as disciplinas')
+                                ->schema([
+                                    Forms\Components\Select::make('subject_ids')
+                                        ->label('Seleccione as Disciplinas')
+                                        ->options(Subject::pluck('name', 'id'))
+                                        ->multiple()
+                                        ->searchable()
+                                        ->preload()
+                                        ->required()
+                                        ->columnSpanFull(),
+                                ]),
+                        ])->columnSpanFull(),
                     ])
                     ->action(function (array $data): void {
-                        // Actualizar tipo do aluno
+                        // Actualizar dados do aluno
                         $student = Student::find($data['student_id']);
                         if ($student) {
-                            $student->update(['student_type' => $data['student_type']]);
+                            $student->update([
+                                'student_type' => $data['student_type'],
+                                'nuri' => $data['nuri'] ?? null,
+                                'cia' => $data['cia'] ?? null,
+                                'platoon' => $data['platoon'] ?? null,
+                                'section' => $data['section'] ?? null,
+                                'enrollment_date' => $data['enrollment_date'] ?? now(),
+                            ]);
                         }
                         
                         // Criar inscrição na turma

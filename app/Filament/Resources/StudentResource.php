@@ -23,6 +23,9 @@ class StudentResource extends Resource
     protected static ?string $navigationLabel = 'Instruendos';
     protected static ?string $modelLabel = 'Instruendo';
     protected static ?string $pluralModelLabel = 'Instruendos';
+    
+    // Esconder da navegação
+    protected static bool $shouldRegisterNavigation = false;
 
     /**
      * Badge com total de instruendos

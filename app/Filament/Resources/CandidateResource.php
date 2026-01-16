@@ -6,6 +6,7 @@ use App\Filament\Resources\CandidateResource\Pages;
 use App\Filament\Resources\CandidateResource\RelationManagers;
 use App\Models\Candidate;
 use App\Models\StudentType;
+use App\Services\SmsService;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
@@ -129,14 +130,22 @@ class CandidateResource extends Resource
                                 ->label('Nome Completo')
                                 ->required()
                                 ->maxLength(191)
-                                ->columnSpanFull(),
+                                ->unique(ignoreRecord: true)
+                                ->validationMessages([
+                                    'unique' => 'Já existe um alistado com este nome.',
+                                ]),
+                            Forms\Components\TextInput::make('student_number')
+                                ->label('Nº de Ordem')
+                                ->maxLength(50)
+                                ->required(),
                             Forms\Components\TextInput::make('id_number')
                                 ->label('Nº do BI')
                                 ->unique(ignoreRecord: true)
                                 ->required()
                                 ->maxLength(191),
                             Forms\Components\DatePicker::make('birth_date')
-                                ->label('Data de Nascimento'),
+                                ->label('Data de Nascimento')
+                                ->required(),
                             Forms\Components\Select::make('gender')
                                 ->label('Género')
                                 ->options([
@@ -151,7 +160,8 @@ class CandidateResource extends Resource
                                     'casado' => 'Casado(a)',
                                     'divorciado' => 'Divorciado(a)',
                                     'viuvo' => 'Viúvo(a)',
-                                ]),
+                                ])
+                                ->required(),
                             Forms\Components\TextInput::make('father_name')
                                 ->label('Nome do Pai')
                                 ->maxLength(191),
@@ -171,6 +181,7 @@ class CandidateResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->live()
+                                ->required()
                                 ->afterStateUpdated(fn ($set) => $set('municipality_id', null)),
                             Forms\Components\Select::make('municipality_id')
                                 ->label('Município')
@@ -184,7 +195,8 @@ class CandidateResource extends Resource
                                         ->pluck('name', 'id');
                                 })
                                 ->searchable()
-                                ->preload(),
+                                ->preload()
+                                ->required(),
                             Forms\Components\Textarea::make('address')
                                 ->label('Endereço')
                                 ->rows(2)
@@ -192,11 +204,16 @@ class CandidateResource extends Resource
                             Forms\Components\TextInput::make('phone')
                                 ->label('Telefone')
                                 ->tel()
-                                ->maxLength(191),
+                                ->prefix('+244')
+                                ->placeholder('9XX XXX XXX')
+                                ->mask('999 999 999')
+                                ->maxLength(191)
+                                ->required(),
                             Forms\Components\TextInput::make('email')
                                 ->label('E-mail')
                                 ->email()
-                                ->maxLength(191),
+                                ->maxLength(191)
+                                ->unique(ignoreRecord: true),
                         ])->columns(2),
 
                     // Etapa 4 - Habilitações
@@ -204,18 +221,83 @@ class CandidateResource extends Resource
                         ->icon('heroicon-o-academic-cap')
                         ->description('Formação académica')
                         ->schema([
-                            Forms\Components\TextInput::make('education_level')
+                            Forms\Components\Select::make('education_level')
                                 ->label('Nível Académico')
-                                ->placeholder('Ex: 12ª Classe, Licenciatura')
-                                ->maxLength(191),
-                            Forms\Components\TextInput::make('education_area')
+                                ->options([
+                                    'Ensino Primário' => 'Ensino Primário (1ª - 6ª Classe)',
+                                    '7ª Classe' => '7ª Classe',
+                                    '8ª Classe' => '8ª Classe',
+                                    '9ª Classe' => '9ª Classe (I Ciclo)',
+                                    '10ª Classe' => '10ª Classe',
+                                    '11ª Classe' => '11ª Classe',
+                                    '12ª Classe' => '12ª Classe (II Ciclo)',
+                                    '13ª Classe' => '13ª Classe',
+                                    'Técnico Médio' => 'Técnico Médio',
+                                    'Técnico Profissional' => 'Técnico Profissional',
+                                    'Bacharelato' => 'Bacharelato',
+                                    'Licenciatura' => 'Licenciatura',
+                                    'Pós-Graduação' => 'Pós-Graduação',
+                                    'Mestrado' => 'Mestrado',
+                                    'Doutoramento' => 'Doutoramento',
+                                ])
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                            Forms\Components\Select::make('education_area')
                                 ->label('Área de Formação')
-                                ->maxLength(191),
+                                ->options([
+                                    'Administração e Gestão' => 'Administração e Gestão',
+                                    'Agricultura e Pecuária' => 'Agricultura e Pecuária',
+                                    'Arquitectura e Urbanismo' => 'Arquitectura e Urbanismo',
+                                    'Artes e Design' => 'Artes e Design',
+                                    'Biologia e Ciências da Vida' => 'Biologia e Ciências da Vida',
+                                    'Ciências da Comunicação' => 'Ciências da Comunicação',
+                                    'Ciências da Educação' => 'Ciências da Educação',
+                                    'Ciências Jurídicas' => 'Ciências Jurídicas / Direito',
+                                    'Ciências Policiais' => 'Ciências Policiais',
+                                    'Ciências Políticas' => 'Ciências Políticas',
+                                    'Ciências Sociais' => 'Ciências Sociais',
+                                    'Contabilidade e Auditoria' => 'Contabilidade e Auditoria',
+                                    'Economia' => 'Economia',
+                                    'Electrónica e Telecomunicações' => 'Electrónica e Telecomunicações',
+                                    'Enfermagem' => 'Enfermagem',
+                                    'Engenharia Civil' => 'Engenharia Civil',
+                                    'Engenharia Electrotécnica' => 'Engenharia Electrotécnica',
+                                    'Engenharia Informática' => 'Engenharia Informática',
+                                    'Engenharia Mecânica' => 'Engenharia Mecânica',
+                                    'Farmácia' => 'Farmácia',
+                                    'Filosofia' => 'Filosofia',
+                                    'Física' => 'Física',
+                                    'Geografia' => 'Geografia',
+                                    'Geologia e Minas' => 'Geologia e Minas',
+                                    'Gestão de Recursos Humanos' => 'Gestão de Recursos Humanos',
+                                    'História' => 'História',
+                                    'Hotelaria e Turismo' => 'Hotelaria e Turismo',
+                                    'Informática' => 'Informática',
+                                    'Letras e Linguística' => 'Letras e Linguística',
+                                    'Marketing' => 'Marketing',
+                                    'Matemática' => 'Matemática',
+                                    'Medicina' => 'Medicina',
+                                    'Petróleos e Gás' => 'Petróleos e Gás',
+                                    'Psicologia' => 'Psicologia',
+                                    'Química' => 'Química',
+                                    'Relações Internacionais' => 'Relações Internacionais',
+                                    'Saúde Pública' => 'Saúde Pública',
+                                    'Secretariado Executivo' => 'Secretariado Executivo',
+                                    'Serviço Social' => 'Serviço Social',
+                                    'Sociologia' => 'Sociologia',
+                                    'Tecnologias de Informação' => 'Tecnologias de Informação',
+                                    'Veterinária' => 'Veterinária',
+                                    'Outra' => 'Outra',
+                                ])
+                                ->searchable()
+                                ->preload(),
                             Forms\Components\Select::make('recruitment_type_id')
                                 ->label('Tipo de Recrutamento')
                                 ->relationship('recruitmentType', 'name')
                                 ->searchable()
-                                ->preload(),
+                                ->preload()
+                                ->required(),
                             Forms\Components\Select::make('academic_year_id')
                                 ->label('Ano Académico')
                                 ->options(\App\Models\AcademicYear::where('is_active', true)->pluck('year', 'id'))
@@ -284,7 +366,7 @@ class CandidateResource extends Resource
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('student_type')
-                    ->label('Tipo de Aluno')
+                    ->label('Estado')
                     ->badge()
                     ->color(fn ($state) => $typeColors[$state] ?? 'primary'),
                 Tables\Columns\TextColumn::make('created_at')
@@ -305,7 +387,73 @@ class CandidateResource extends Resource
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
                     ->createAnother(true)
-                    ->successNotificationTitle('Alistado criado com sucesso!'),
+                    ->successNotificationTitle('Alistado criado com sucesso!')
+                    ->after(function (Candidate $record) {
+                        // Enviar SMS ao alistado após criar
+                        $phone = $record->phone;
+                        
+                        if (!empty($phone)) {
+                            $candidateName = $record->full_name ?? 'Alistado';
+                            
+                            // Buscar nome da instituição
+                            $institutionName = 'Escola de Formacao da Policia Nacional';
+                            if ($record->institution_id) {
+                                $institution = \App\Models\Institution::find($record->institution_id);
+                                if ($institution) {
+                                    $institutionName = $institution->name;
+                                }
+                            }
+                            
+                            // Remover acentos do nome da instituição
+                            $institutionName = strtr($institutionName, [
+                                'ã' => 'a', 'á' => 'a', 'à' => 'a', 'â' => 'a',
+                                'é' => 'e', 'ê' => 'e', 'í' => 'i', 'ó' => 'o',
+                                'ô' => 'o', 'õ' => 'o', 'ú' => 'u', 'ç' => 'c',
+                                'Ã' => 'A', 'Á' => 'A', 'À' => 'A', 'Â' => 'A',
+                                'É' => 'E', 'Ê' => 'E', 'Í' => 'I', 'Ó' => 'O',
+                                'Ô' => 'O', 'Õ' => 'O', 'Ú' => 'U', 'Ç' => 'C',
+                            ]);
+                            
+                            // Remover acentos do nome do candidato
+                            $candidateName = strtr($candidateName, [
+                                'ã' => 'a', 'á' => 'a', 'à' => 'a', 'â' => 'a',
+                                'é' => 'e', 'ê' => 'e', 'í' => 'i', 'ó' => 'o',
+                                'ô' => 'o', 'õ' => 'o', 'ú' => 'u', 'ç' => 'c',
+                                'Ã' => 'A', 'Á' => 'A', 'À' => 'A', 'Â' => 'A',
+                                'É' => 'E', 'Ê' => 'E', 'Í' => 'I', 'Ó' => 'O',
+                                'Ô' => 'O', 'Õ' => 'O', 'Ú' => 'U', 'Ç' => 'C',
+                            ]);
+                            
+                            try {
+                                $smsService = new SmsService();
+                                $result = $smsService->sendAgentRegistrationNotification(
+                                    $phone,
+                                    $candidateName,
+                                    $institutionName
+                                );
+                                
+                                if ($result['success']) {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('SMS enviado')
+                                        ->body("Notificacao enviada para {$phone}")
+                                        ->success()
+                                        ->send();
+                                } else {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Falha ao enviar SMS')
+                                        ->body("Nao foi possivel enviar SMS. Detalhes: " . ($result['message'] ?? 'Erro desconhecido'))
+                                        ->warning()
+                                        ->send();
+                                }
+                            } catch (\Exception $e) {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Erro ao enviar SMS')
+                                    ->body("Erro: " . $e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }
+                    }),
             ])
             ->actions([
                 \Filament\Actions\EditAction::make()
