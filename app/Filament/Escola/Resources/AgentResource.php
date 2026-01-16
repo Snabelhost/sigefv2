@@ -234,24 +234,37 @@ class AgentResource extends Resource
                         $name = $record->candidate?->full_name ?? 'Agente';
                         return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=0D47A1&color=fff&size=128&bold=true';
                     }),
-                Tables\Columns\TextColumn::make('candidate.full_name')
+                Tables\Columns\TextColumn::make('nome_completo')
                     ->label('Nome')
-                    ->formatStateUsing(function ($state, $record) {
-                        // Se tem state, usar diretamente
-                        if ($state) {
-                            return $state;
+                    ->getStateUsing(function (Student $record): string {
+                        // Forçar carregamento da relação
+                        $record->loadMissing('candidate');
+                        
+                        // Tentar obter o nome do candidato
+                        if ($record->candidate && $record->candidate->full_name) {
+                            return $record->candidate->full_name;
                         }
-                        // Fallback: buscar diretamente pelo candidate_id
-                        if ($record && $record->candidate_id) {
+                        
+                        // Fallback direto à BD
+                        if ($record->candidate_id) {
                             $candidate = \App\Models\Candidate::find($record->candidate_id);
                             if ($candidate) {
                                 return $candidate->full_name;
                             }
                         }
+                        
                         return '-';
                     })
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas('candidate', fn ($q) => $q->where('full_name', 'like', "%{$search}%"));
+                    })
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query->orderBy(
+                            \App\Models\Candidate::select('full_name')
+                                ->whereColumn('candidates.id', 'students.candidate_id')
+                                ->limit(1),
+                            $direction
+                        );
                     })
                     ->wrap(),
                 Tables\Columns\TextColumn::make('nuri')
