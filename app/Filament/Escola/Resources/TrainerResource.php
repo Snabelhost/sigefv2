@@ -35,63 +35,8 @@ class TrainerResource extends Resource
     // Reutiliza o mesmo form do Admin
     public static function form(Schema $form): Schema
     {
-        return $form
-            ->schema([
-                \Filament\Schemas\Components\Section::make('Identificação e Cargo')
-                    ->schema([
-                        Forms\Components\FileUpload::make('photo')
-                            ->label('Foto')
-                            ->image()
-                            ->avatar()
-                            ->directory('trainers'),
-                        Forms\Components\TextInput::make('full_name')
-                            ->label('Nome Completo')
-                            ->required()
-                            ->maxLength(191),
-                        Forms\Components\TextInput::make('nip')
-                            ->label('NIP')
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(191),
-                        Forms\Components\Select::make('gender')
-                            ->label('Género')
-                            ->options([
-                                'M' => 'Masculino',
-                                'F' => 'Feminino',
-                            ])
-                            ->required(),
-                        Forms\Components\Select::make('rank_id')
-                            ->label('Patente')
-                            ->relationship('rank', 'name')
-                            ->searchable()
-                            ->preload(),
-                    ])->columns(2),
-
-                \Filament\Schemas\Components\Section::make('Informação Profissional')
-                    ->schema([
-                        Forms\Components\TextInput::make('organ')
-                            ->label('Órgão/Unidade')
-                            ->maxLength(191),
-                        Forms\Components\TextInput::make('education_level')
-                            ->label('Nível Académico')
-                            ->maxLength(191),
-                        Forms\Components\TextInput::make('phone')
-                            ->label('Telefone')
-                            ->tel()
-                            ->maxLength(191),
-                        Forms\Components\Select::make('trainer_type')
-                            ->label('Tipo de Formador')
-                            ->options([
-                                'interno' => 'Interno',
-                                'externo' => 'Externo',
-                            ])
-                            ->required(),
-                        Forms\Components\Toggle::make('is_active')
-                            ->label('Activo')
-                            ->default(true)
-                            ->required(),
-                    ])->columns(2),
-            ]);
+        // Usa o formulário partilhado
+        return $form->schema(\App\Filament\Forms\SharedForms::getTrainerFormSchema());
     }
 
     // Reutiliza o mesmo table do Admin (sem coluna de instituição)
