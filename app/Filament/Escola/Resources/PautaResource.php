@@ -26,7 +26,15 @@ class PautaResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->with(['courseMap', 'academicYear', 'students']);
+        $query = parent::getEloquentQuery()->with(['courseMap', 'academicYear', 'students']);
+        
+        // Filtrar pela instituição do tenant
+        $tenant = Filament::getTenant();
+        if ($tenant) {
+            $query->where('institution_id', $tenant->id);
+        }
+        
+        return $query;
     }
 
     public static function table(Table $table): Table

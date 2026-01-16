@@ -21,7 +21,15 @@ class StudentLeaveResource extends Resource
     
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->with(['student.candidate']);
+        $query = parent::getEloquentQuery()->with(['student.candidate']);
+        
+        // Filtrar dispensas de formandos da instituição do tenant
+        $tenant = \Filament\Facades\Filament::getTenant();
+        if ($tenant) {
+            $query->whereHas('student', fn ($q) => $q->where('institution_id', $tenant->id));
+        }
+        
+        return $query;
     }
 
     public static function form(Schema $form): Schema
