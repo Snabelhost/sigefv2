@@ -1,119 +1,112 @@
 <?php
 /**
- * Script de Otimização do SIGEF
- * Execute este arquivo via navegador ou CLI para aplicar otimizações
+ * Script de Otimização - Execute no terminal do Laragon
+ * 
+ * Comandos para executar:
+ * 1. Abra o terminal do Laragon (clique direito no ícone > Terminal)
+ * 2. Navegue até a pasta: cd c:\laragon\www\sigefv2
+ * 3. Execute: php artisan optimize:clear
+ * 4. Execute: php artisan optimize
+ * 5. Execute: php artisan migrate (para adicionar os índices)
+ * 
+ * Ou abra o browser em: http://sigefv2.test/optimize.php
  */
 
-// Bootstrap Laravel
-require __DIR__ . '/../vendor/autoload.php';
-$app = require_once __DIR__ . '/../bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-$kernel->handle($request = Illuminate\Http\Request::capture());
+// Detectar ambiente
+$isWeb = php_sapi_name() !== 'cli';
 
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\File;
-
-header('Content-Type: text/html; charset=utf-8');
-echo "<h1>🚀 SIGEF - Otimização do Sistema</h1>";
-echo "<pre>";
-
-$results = [];
-
-// 1. Limpar cache de views compiladas
-echo "1. Limpando views compiladas... ";
-$viewsPath = storage_path('framework/views');
-$files = glob($viewsPath . '/*.php');
-$count = count($files);
-foreach ($files as $file) {
-    @unlink($file);
+if ($isWeb) {
+    header('Content-Type: text/html; charset=utf-8');
+    echo '<html><head><title>Otimização SIGEF</title>';
+    echo '<style>body{font-family:Arial;padding:20px;background:#1a1a2e;color:#eee;}';
+    echo '.success{color:#4ade80;}.error{color:#f87171;}.info{color:#60a5fa;}';
+    echo 'pre{background:#16213e;padding:15px;border-radius:8px;overflow-x:auto;}';
+    echo 'h1{color:#818cf8;}</style></head><body>';
+    echo '<h1>🚀 Otimização SIGEF v2</h1>';
 }
-echo "✓ ($count arquivos removidos)\n";
-$results[] = "Views compiladas: $count arquivos removidos";
 
-// 2. Limpar OPcache
-echo "2. Limpando OPcache... ";
-if (function_exists('opcache_reset')) {
-    opcache_reset();
-    echo "✓\n";
-    $results[] = "OPcache: Limpo com sucesso";
+function output($msg, $class = 'info') {
+    global $isWeb;
+    if ($isWeb) {
+        echo "<p class='{$class}'>{$msg}</p>";
+        ob_flush();
+        flush();
+    } else {
+        echo $msg . "\n";
+    }
+}
+
+// Mudar para diretório do Laravel
+chdir(__DIR__);
+
+output('📂 Diretório: ' . getcwd());
+
+// Limpar caches
+output('🧹 Limpando caches...', 'info');
+
+$commands = [
+    'php artisan config:clear' => 'Limpar config cache',
+    'php artisan cache:clear' => 'Limpar application cache',
+    'php artisan view:clear' => 'Limpar view cache',
+    'php artisan route:clear' => 'Limpar route cache',
+    'php artisan event:clear' => 'Limpar event cache',
+];
+
+foreach ($commands as $cmd => $desc) {
+    exec($cmd . ' 2>&1', $cmdOutput, $returnCode);
+    if ($returnCode === 0) {
+        output("✅ {$desc}", 'success');
+    } else {
+        output("❌ {$desc}: " . implode(' ', $cmdOutput), 'error');
+    }
+    $cmdOutput = [];
+}
+
+// Otimizar
+output('⚡ Otimizando aplicação...', 'info');
+
+$optimizeCommands = [
+    'php artisan config:cache' => 'Cache de configuração',
+    'php artisan route:cache' => 'Cache de rotas',
+    'php artisan view:cache' => 'Cache de views',
+    'php artisan icons:cache' => 'Cache de ícones',
+];
+
+foreach ($optimizeCommands as $cmd => $desc) {
+    exec($cmd . ' 2>&1', $cmdOutput, $returnCode);
+    if ($returnCode === 0) {
+        output("✅ {$desc}", 'success');
+    } else {
+        output("⚠️ {$desc} (pode ser ignorado)", 'info');
+    }
+    $cmdOutput = [];
+}
+
+// Verificar opcache
+output('🔧 Verificando OPcache...', 'info');
+if (function_exists('opcache_get_status')) {
+    $status = opcache_get_status();
+    if ($status && $status['opcache_enabled']) {
+        output('✅ OPcache está ativo!', 'success');
+        $stats = $status['memory_usage'];
+        $hitRate = round($status['opcache_statistics']['opcache_hit_rate'] ?? 0, 2);
+        output("📊 Hit Rate: {$hitRate}%", 'info');
+    } else {
+        output('⚠️ OPcache não está ativo. Considere ativar em php.ini', 'error');
+    }
 } else {
-    echo "⚠ (OPcache não habilitado)\n";
-    $results[] = "OPcache: Não disponível";
+    output('⚠️ OPcache não disponível', 'error');
 }
 
-// 3. Limpar cache de configuração
-echo "3. Limpando cache de configuração... ";
-Artisan::call('config:clear');
-echo "✓\n";
-$results[] = "Config cache: Limpo";
+output('', 'info');
+output('✨ Otimização concluída!', 'success');
+output('', 'info');
+output('📌 Dicas adicionais:', 'info');
+output('1. Execute "php artisan migrate" para adicionar índices de performance', 'info');
+output('2. No Laragon, reinicie Apache/Nginx após estas mudanças', 'info');
+output('3. Considere usar MySQL 8.0+ para melhor performance', 'info');
 
-// 4. Limpar cache de rotas
-echo "4. Limpando cache de rotas... ";
-Artisan::call('route:clear');
-echo "✓\n";
-$results[] = "Route cache: Limpo";
-
-// 5. Limpar cache de aplicação
-echo "5. Limpando cache de aplicação... ";
-Artisan::call('cache:clear');
-echo "✓\n";
-$results[] = "Application cache: Limpo";
-
-// 6. Limpar cache de views
-echo "6. Limpando cache de views... ";
-Artisan::call('view:clear');
-echo "✓\n";
-$results[] = "View cache: Limpo";
-
-// 7. Gerar cache de configuração para produção
-echo "7. Gerando cache de configuração... ";
-try {
-    Artisan::call('config:cache');
-    echo "✓\n";
-    $results[] = "Config cache: Gerado para produção";
-} catch (Exception $e) {
-    echo "⚠ (Erro: " . $e->getMessage() . ")\n";
-    $results[] = "Config cache: Erro ao gerar";
+if ($isWeb) {
+    echo '<br><a href="/admin" style="color:#818cf8;text-decoration:none;padding:10px 20px;background:#16213e;border-radius:8px;">← Voltar ao Admin</a>';
+    echo '</body></html>';
 }
-
-// 8. Gerar cache de rotas
-echo "8. Gerando cache de rotas... ";
-try {
-    Artisan::call('route:cache');
-    echo "✓\n";
-    $results[] = "Route cache: Gerado para produção";
-} catch (Exception $e) {
-    echo "⚠ (Erro: " . $e->getMessage() . ")\n";
-    $results[] = "Route cache: Erro ao gerar";
-}
-
-// 9. Otimizar autoloader do Composer
-echo "9. Verificando autoloader... ";
-$composerOptimized = file_exists(base_path('vendor/composer/autoload_classmap.php'));
-if ($composerOptimized) {
-    echo "✓ (Já otimizado)\n";
-} else {
-    echo "⚠ (Execute: composer dump-autoload -o)\n";
-}
-$results[] = "Autoloader: " . ($composerOptimized ? "Otimizado" : "Precisa otimizar");
-
-echo "\n</pre>";
-
-echo "<h2>📊 Resumo das Otimizações</h2>";
-echo "<ul>";
-foreach ($results as $result) {
-    echo "<li>$result</li>";
-}
-echo "</ul>";
-
-echo "<h2>💡 Recomendações Adicionais</h2>";
-echo "<ul>";
-echo "<li><strong>Em Produção:</strong> Configure <code>APP_DEBUG=false</code> no .env</li>";
-echo "<li><strong>Composer:</strong> Execute <code>composer dump-autoload -o</code> para otimizar o autoloader</li>";
-echo "<li><strong>Assets:</strong> Execute <code>npm run build</code> para minificar assets</li>";
-echo "<li><strong>Banco de Dados:</strong> Considere adicionar índices nas colunas mais consultadas</li>";
-echo "<li><strong>PHP:</strong> Certifique-se de que OPcache está habilitado no php.ini</li>";
-echo "</ul>";
-
-echo "<p style='color: green; font-weight: bold;'>✅ Otimização concluída! O sistema deve estar mais rápido agora.</p>";
-echo "<p><a href='/admin'>← Voltar ao Painel</a></p>";

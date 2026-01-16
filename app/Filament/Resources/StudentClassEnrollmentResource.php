@@ -68,16 +68,11 @@ class StudentClassEnrollmentResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('student_id')
                             ->label('Aluno')
-                            ->options(
-                                Student::with('candidate')
-                                    ->get()
-                                    ->mapWithKeys(fn ($student) => [
-                                        $student->id => ($student->candidate->full_name ?? 'N/A') . ' - ' . $student->student_number
-                                    ])
-                            )
+                            ->relationship('student', 'student_number')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => ($record->candidate->full_name ?? 'N/A') . ' - ' . $record->student_number)
                             ->required()
-                            ->searchable()
-                            ->preload(),
+                            ->searchable(['student_number'])
+                            ->preload(false),
                         Forms\Components\Select::make('student_type')
                             ->label('Tipo de Aluno')
                             ->options(fn () => self::getStudentTypeOptions())
@@ -85,19 +80,15 @@ class StudentClassEnrollmentResource extends Resource
                             ->live(),
                         Forms\Components\Select::make('class_id')
                             ->label('Turma')
-                            ->options(
-                                StudentClass::with('institution')
-                                    ->get()
-                                    ->mapWithKeys(fn ($class) => [$class->id => $class->name . ' - ' . ($class->institution->name ?? '')])
-                            )
+                            ->relationship('studentClass', 'name')
                             ->required()
                             ->searchable()
-                            ->preload(),
+                            ->preload(false),
                         Forms\Components\Select::make('course_phase_id')
                             ->label('Fase do Curso')
-                            ->options(CoursePhase::pluck('name', 'id'))
+                            ->relationship('coursePhase', 'name')
                             ->searchable()
-                            ->preload(),
+                            ->preload(false),
                         Forms\Components\TextInput::make('classroom')
                             ->label('Sala de Aula')
                             ->maxLength(50),
@@ -181,18 +172,15 @@ class StudentClassEnrollmentResource extends Resource
                                     Forms\Components\Select::make('student_id')
                                         ->label('Aluno')
                                         ->options(function () {
-                                            return Student::with(['candidate', 'classEnrollments.studentClass'])
+                                            return Student::with(['candidate'])
+                                                ->withCount('classEnrollments')
+                                                ->limit(100)
                                                 ->get()
                                                 ->mapWithKeys(function ($student) {
                                                     $name = $student->candidate->full_name ?? 'N/A';
                                                     $number = $student->student_number;
-                                                    $enrollmentCount = $student->classEnrollments->count();
-                                                    
-                                                    // Adicionar indicador se já tem inscrições
-                                                    $indicator = $enrollmentCount > 0 
-                                                        ? " ✓ ({$enrollmentCount} inscrição(ões))" 
-                                                        : " ○ (Sem inscrição)";
-                                                    
+                                                    $count = $student->class_enrollments_count;
+                                                    $indicator = $count > 0 ? " ✓ ({$count})" : " ○";
                                                     return [$student->id => $name . ' - ' . $number . $indicator];
                                                 });
                                         })
@@ -204,11 +192,8 @@ class StudentClassEnrollmentResource extends Resource
                                             if ($state) {
                                                 $student = Student::with('classEnrollments.studentClass')->find($state);
                                                 if ($student) {
-                                                    // Preencher tipo de aluno
                                                     $set('student_type', $student->student_type);
-                                                    // Preencher NIP se existir
                                                     $set('nip_display', $student->nuri);
-                                                    // Informação de inscrições existentes
                                                     $enrollments = $student->classEnrollments;
                                                     if ($enrollments->count() > 0) {
                                                         $classes = $enrollments->map(fn($e) => $e->studentClass->name ?? 'N/A')->implode(', ');

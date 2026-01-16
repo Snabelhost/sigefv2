@@ -75,6 +75,7 @@ class UnifiedLoginController extends Controller
     protected function getAccessiblePanels($user): array
     {
         $accessiblePanels = [];
+        
         $panels = [
             'admin' => ['name' => 'Administração', 'icon' => 'heroicon-o-cog-6-tooth', 'url' => '/admin'],
             'escola' => ['name' => 'Escola', 'icon' => 'heroicon-o-academic-cap', 'url' => $user->institution_id ? '/escola/' . $user->institution_id : '/escola'],
@@ -85,12 +86,49 @@ class UnifiedLoginController extends Controller
         foreach ($panels as $panelId => $panelInfo) {
             try {
                 $panel = \Filament\Facades\Filament::getPanel($panelId);
-                if ($user->canAccessPanel($panel)) {
+                
+                // Verificar se o utilizador tem acesso explícito a este painel
+                $hasExplicitAccess = false;
+                
+                // Admin panel - super_admin ou admin ou panel_user
+                if ($panelId === 'admin') {
+                    if ($user->hasRole('super_admin') || $user->hasRole('admin') || $user->hasRole('panel_user') || $user->hasRole('admin_admin')) {
+                        $hasExplicitAccess = true;
+                    }
+                }
+                
+                // Escola panel - precisa role E institution_id (escola é específica)
+                if ($panelId === 'escola') {
+                    if (($user->hasRole('escola_admin') || $user->hasRole('escola_user')) && $user->institution_id) {
+                        $hasExplicitAccess = true;
+                    }
+                }
+                
+                // DPQ panel - NÃO precisa institution_id (é geral)
+                if ($panelId === 'dpq') {
+                    if ($user->hasRole('dpq_admin') || $user->hasRole('dpq_user')) {
+                        $hasExplicitAccess = true;
+                    }
+                }
+                
+                // Comando panel - NÃO precisa institution_id (é geral)
+                if ($panelId === 'comando') {
+                    if ($user->hasRole('comando_admin') || $user->hasRole('comando_user')) {
+                        $hasExplicitAccess = true;
+                    }
+                }
+                
+                if ($hasExplicitAccess) {
                     $accessiblePanels[$panelId] = $panelInfo;
                 }
             } catch (\Exception $e) {
                 continue;
             }
+        }
+        
+        // Se super_admin não tem nenhum painel específico, dar acesso ao admin
+        if ($user->hasRole('super_admin') && empty($accessiblePanels)) {
+            $accessiblePanels['admin'] = $panels['admin'];
         }
 
         return $accessiblePanels;
