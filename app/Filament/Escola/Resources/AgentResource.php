@@ -236,10 +236,7 @@ class AgentResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('candidate.full_name')
                     ->label('Nome')
-                    ->default(fn ($record) => $record->candidate?->full_name ?? 'Sem candidato vinculado')
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('candidate', fn ($c) => $c->where('full_name', 'like', "%{$search}%"));
-                    })
+                    ->searchable()
                     ->sortable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('nuri')
