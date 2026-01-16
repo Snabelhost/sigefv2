@@ -67,23 +67,25 @@ class CourseResource extends Resource
                     ->limit(50)
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-
             ->filters([])
             ->headerActions([
                 \Filament\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus')
+                    ->modalWidth('xl')
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Criar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
                     ->createAnother(true)
-                    ->successNotificationTitle('Registo criado com sucesso!'),
+                    ->successNotificationTitle('Curso criado com sucesso!')
+                    ->label('Novo Curso'),
             ])
             ->actions([
                 \Filament\Actions\EditAction::make()
                     ->icon('heroicon-o-pencil-square')
+                    ->modalWidth('xl')
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
-                    ->successNotificationTitle('Registo atualizado com sucesso!'),
+                    ->successNotificationTitle('Curso atualizado com sucesso!'),
                 \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([
