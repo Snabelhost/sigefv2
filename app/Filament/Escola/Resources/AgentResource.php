@@ -234,14 +234,30 @@ class AgentResource extends Resource
                         $name = $record->candidate?->full_name ?? 'Agente';
                         return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=0D47A1&color=fff&size=128&bold=true';
                     }),
-                Tables\Columns\TextColumn::make('candidate.full_name')
+                Tables\Columns\TextColumn::make('full_name')
                     ->label('Nome')
+                    ->getStateUsing(function ($record) {
+                        // Primeiro tenta o candidato
+                        if ($record->candidate?->full_name) {
+                            return $record->candidate->full_name;
+                        }
+                        // Se não tem candidato, busca no candidates pelo NIP
+                        if ($record->nuri) {
+                            $candidate = \App\Models\Candidate::where('id_number', $record->nuri)->first();
+                            if ($candidate) {
+                                return $candidate->full_name;
+                            }
+                        }
+                        return 'NIP: ' . ($record->nuri ?? 'N/A');
+                    })
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('candidate', fn ($q) => $q->where('full_name', 'like', "%{$search}%"));
+                        return $query->where(function ($q) use ($search) {
+                            $q->whereHas('candidate', fn ($c) => $c->where('full_name', 'like', "%{$search}%"))
+                              ->orWhere('nuri', 'like', "%{$search}%");
+                        });
                     })
                     ->sortable()
-                    ->wrap()
-                    ->placeholder('Sem nome'),
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('nuri')
                     ->label('NIP')
                     ->searchable(),
