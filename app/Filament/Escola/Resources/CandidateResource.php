@@ -182,6 +182,14 @@ class CandidateResource extends Resource
             ->headerActions([
                 \Filament\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        // Definir automaticamente a instituição do utilizador logado
+                        $tenant = \Filament\Facades\Filament::getTenant();
+                        if ($tenant) {
+                            $data['institution_id'] = $tenant->id;
+                        }
+                        return $data;
+                    })
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Criar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))

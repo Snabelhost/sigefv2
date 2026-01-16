@@ -22,7 +22,15 @@ class StudentResource extends Resource
     
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->with(['candidate', 'currentPhase', 'courseMap']);
+        $query = parent::getEloquentQuery()->with(['candidate', 'currentPhase', 'courseMap']);
+        
+        // Filtrar pela instituição do tenant
+        $tenant = \Filament\Facades\Filament::getTenant();
+        if ($tenant) {
+            $query->where('institution_id', $tenant->id);
+        }
+        
+        return $query;
     }
 
     public static function form(Schema $form): Schema

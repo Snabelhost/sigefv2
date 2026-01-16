@@ -40,12 +40,20 @@ class AgentResource extends Resource
         return 'success';
     }
 
-    // Filtrar apenas formandos com status "concluiu"
+    // Filtrar apenas formandos com status "concluiu" DA INSTITUIÇÃO LOGADA
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->where('status', 'concluiu')
             ->with(['candidate', 'institution', 'provenance', 'rank']);
+        
+        // Filtrar pela instituição do tenant
+        $tenant = \Filament\Facades\Filament::getTenant();
+        if ($tenant) {
+            $query->where('institution_id', $tenant->id);
+        }
+        
+        return $query;
     }
 
     public static function form(Schema $form): Schema
@@ -70,11 +78,10 @@ class AgentResource extends Resource
 
                 \Filament\Schemas\Components\Section::make('Informação Profissional')
                     ->schema([
-                        Forms\Components\Select::make('institution_id')
+                        // Instituição é definida automaticamente pelo tenant - não precisa selecionar
+                        Forms\Components\Placeholder::make('institution_info')
                             ->label('Escola de Formação')
-                            ->options(Institution::where('institution_type_id', 2)->pluck('name', 'id'))
-                            ->searchable()
-                            ->preload(),
+                            ->content(fn () => \Filament\Facades\Filament::getTenant()?->name ?? 'N/A'),
                         Forms\Components\Select::make('provenance_id')
                             ->label('Proveniência (Órgão/Unidade)')
                             ->options(Provenance::pluck('name', 'id'))
@@ -188,6 +195,14 @@ class AgentResource extends Resource
             ->headerActions([
                 \Filament\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        // Definir automaticamente a instituição do tenant
+                        $tenant = \Filament\Facades\Filament::getTenant();
+                        if ($tenant) {
+                            $data['institution_id'] = $tenant->id;
+                        }
+                        return $data;
+                    })
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Criar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
