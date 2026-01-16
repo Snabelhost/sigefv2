@@ -234,8 +234,9 @@ class AgentResource extends Resource
                         $name = $record->candidate?->full_name ?? 'Agente';
                         return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=0D47A1&color=fff&size=128&bold=true';
                     }),
-                Tables\Columns\TextColumn::make('full_name')
+                Tables\Columns\TextColumn::make('agent_name')
                     ->label('Nome')
+                    ->getStateUsing(fn (Student $record) => $record->full_name)
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas('candidate', fn ($q) => $q->where('full_name', 'like', "%{$search}%"));
                     })
