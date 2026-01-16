@@ -119,6 +119,7 @@ class AgentResource extends Resource
                                     ->label('Nome Completo')
                                     ->required()
                                     ->maxLength(191)
+                                    ->dehydrated(true)
                                     ->default(fn ($record) => $record?->candidate?->full_name)
                                     ->afterStateHydrated(function ($state, $set, $record) {
                                         if ($record && !$state) {
@@ -268,6 +269,13 @@ class AgentResource extends Resource
                 \Filament\Actions\CreateAction::make()
                     ->icon('heroicon-o-plus')
                     ->mutateFormDataUsing(function (array $data): array {
+                        // DEBUG: Log para verificar os dados recebidos
+                        \Illuminate\Support\Facades\Log::info('AgentResource - mutateFormDataUsing', [
+                            'full_name_manual' => $data['full_name_manual'] ?? 'VAZIO',
+                            'nuri' => $data['nuri'] ?? 'VAZIO',
+                            'candidate_id' => $data['candidate_id'] ?? 'VAZIO',
+                        ]);
+                        
                         // Obter o primeiro tipo de recrutamento disponível
                         $recruitmentTypeId = \App\Models\RecruitmentType::first()?->id;
                         
