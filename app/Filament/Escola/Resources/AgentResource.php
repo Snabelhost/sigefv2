@@ -223,7 +223,6 @@ class AgentResource extends Resource
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['candidate', 'rank', 'institution']))
-            ->deferLoading()
             ->striped()
             ->defaultSort('created_at', 'desc')
             ->columns([
@@ -235,27 +234,8 @@ class AgentResource extends Resource
                         $name = $record->candidate?->full_name ?? 'Agente';
                         return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=0D47A1&color=fff&size=128&bold=true';
                     }),
-                Tables\Columns\TextColumn::make('nome_completo')
+                Tables\Columns\TextColumn::make('full_name')
                     ->label('Nome')
-                    ->getStateUsing(function (Student $record): string {
-                        // Forçar carregamento da relação
-                        $record->loadMissing('candidate');
-                        
-                        // Tentar obter o nome do candidato
-                        if ($record->candidate && $record->candidate->full_name) {
-                            return $record->candidate->full_name;
-                        }
-                        
-                        // Fallback direto à BD
-                        if ($record->candidate_id) {
-                            $candidate = \App\Models\Candidate::find($record->candidate_id);
-                            if ($candidate) {
-                                return $candidate->full_name;
-                            }
-                        }
-                        
-                        return '-';
-                    })
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas('candidate', fn ($q) => $q->where('full_name', 'like', "%{$search}%"));
                     })

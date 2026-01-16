@@ -98,7 +98,25 @@ class Student extends Model
 
     public function getFullNameAttribute()
     {
-        return $this->candidate ? $this->candidate->full_name : 'N/A';
+        // Forçar carregamento da relação se não estiver carregada
+        if (!$this->relationLoaded('candidate')) {
+            $this->load('candidate');
+        }
+        
+        // Tentar via relação
+        if ($this->candidate && $this->candidate->full_name) {
+            return $this->candidate->full_name;
+        }
+        
+        // Fallback: buscar diretamente na BD
+        if ($this->candidate_id) {
+            $candidate = Candidate::find($this->candidate_id);
+            if ($candidate) {
+                return $candidate->full_name;
+            }
+        }
+        
+        return '-';
     }
 
     public function studentTypeRelation()
