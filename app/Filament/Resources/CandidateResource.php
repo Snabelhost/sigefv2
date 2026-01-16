@@ -134,6 +134,16 @@ class CandidateResource extends Resource
                                 ->validationMessages([
                                     'unique' => 'Já existe um alistado com este nome.',
                                 ]),
+                            Forms\Components\Select::make('institution_id')
+                                ->label('Escola de Formação')
+                                ->options(function () {
+                                    // Mostrar todas as instituições
+                                    return \App\Models\Institution::orderBy('name')->pluck('name', 'id');
+                                })
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->helperText('Seleccione a escola onde o alistado será formado'),
                             Forms\Components\TextInput::make('student_number')
                                 ->label('Nº de Ordem')
                                 ->maxLength(50)
@@ -399,12 +409,12 @@ class CandidateResource extends Resource
                         if (!empty($phone)) {
                             $candidateName = $record->full_name ?? 'Alistado';
                             
-                            // Buscar nome da instituição
+                            // Buscar nome da instituição selecionada
                             $institutionName = 'Escola de Formacao da Policia Nacional';
                             if ($record->institution_id) {
-                                $institution = \App\Models\Institution::find($record->institution_id);
-                                if ($institution) {
-                                    $institutionName = $institution->name;
+                                $record->loadMissing('institution');
+                                if ($record->institution) {
+                                    $institutionName = $record->institution->name;
                                 }
                             }
                             
