@@ -408,6 +408,33 @@ class AgentResource extends Resource
             ->actions([
                 \Filament\Actions\EditAction::make()
                     ->icon('heroicon-o-pencil-square')
+                    ->mutateFormDataUsing(function (array $data, $record): array {
+                        // Preservar o candidate_id original se não foi alterado
+                        if (empty($data['candidate_id']) && $record->candidate_id) {
+                            $data['candidate_id'] = $record->candidate_id;
+                        }
+                        
+                        // Se o nome foi alterado, atualizar o candidato
+                        $fullName = $data['full_name_manual'] ?? null;
+                        if ($fullName && $record->candidate_id) {
+                            $candidate = \App\Models\Candidate::find($record->candidate_id);
+                            if ($candidate && $candidate->full_name !== $fullName) {
+                                $candidate->full_name = $fullName;
+                                $candidate->save();
+                            }
+                        }
+                        
+                        // Limpar campos temporários
+                        unset($data['cadastro_mode']);
+                        unset($data['full_name_manual']);
+                        unset($data['nuri_manual']);
+                        unset($data['candidate_name_display']);
+                        
+                        // Garantir enrollment_date
+                        $data['enrollment_date'] = $data['enrollment_date'] ?? $record->enrollment_date ?? now()->format('Y-m-d');
+                        
+                        return $data;
+                    })
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->successNotificationTitle('Agente atualizado com sucesso!'),
