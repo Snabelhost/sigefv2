@@ -36,14 +36,16 @@ class CourseResource extends Resource
                             ->maxLength(191),
                         Forms\Components\TextInput::make('duration_months')
                             ->label('Duração (Meses)')
-                            ->numeric(),
+                            ->numeric()
+                            ->suffix('meses'),
                         Forms\Components\Toggle::make('has_phases')
                             ->label('Possui Fases?')
                             ->default(false),
                         Forms\Components\Textarea::make('description')
                             ->label('Descrição')
+                            ->rows(3)
                             ->columnSpanFull(),
-                    ])->columns(2),
+                    ])->columns(2)->columnSpanFull(),
             ]);
     }
 

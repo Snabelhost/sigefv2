@@ -33,7 +33,8 @@ class CourseResource extends Resource
                             ->maxLength(191),
                         Forms\Components\Textarea::make('description')
                             ->label('Descrição')
-                            ->rows(3),
+                            ->rows(3)
+                            ->columnSpanFull(),
                         Forms\Components\TextInput::make('duration_months')
                             ->label('Duração (meses)')
                             ->numeric()
@@ -41,7 +42,7 @@ class CourseResource extends Resource
                         Forms\Components\Toggle::make('has_phases')
                             ->label('Possui Fases')
                             ->default(false),
-                    ])->columns(2),
+                    ])->columns(2)->columnSpanFull(),
             ]);
     }
 
