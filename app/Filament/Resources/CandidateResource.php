@@ -358,6 +358,10 @@ class CandidateResource extends Resource
                 Tables\Columns\TextColumn::make('id_number')
                     ->label('Nº BI')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('Telefone')
+                    ->searchable()
+                    ->icon('heroicon-o-phone'),
                 Tables\Columns\TextColumn::make('gender')
                     ->label('Género')
                     ->formatStateUsing(fn ($state) => $state === 'M' ? 'Masculino' : ($state === 'F' ? 'Feminino' : $state)),
