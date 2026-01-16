@@ -222,6 +222,7 @@ class AgentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['candidate', 'rank', 'institution']))
             ->deferLoading()
             ->striped()
             ->defaultSort('created_at', 'desc')
