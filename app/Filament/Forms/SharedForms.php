@@ -202,82 +202,124 @@ class SharedForms
     }
 
     /**
-     * Formulário de Formador
+     * Formulário de Formador com Wizard
      */
     public static function getTrainerFormSchema(): array
     {
         return [
-            \Filament\Schemas\Components\Section::make('Identificação e Cargo')
-                ->schema([
-                    Forms\Components\FileUpload::make('photo')
-                        ->label('Foto')
-                        ->image()
-                        ->avatar()
-                        ->directory('trainers'),
-                    Forms\Components\TextInput::make('full_name')
-                        ->label('Nome Completo')
-                        ->required()
-                        ->maxLength(191)
-                        ->unique(ignoreRecord: true)
-                        ->validationMessages([
-                            'unique' => 'Já existe um formador com este nome.',
-                        ]),
-                    Forms\Components\TextInput::make('nip')
-                        ->label('NIP')
-                        ->required()
-                        ->unique(ignoreRecord: true)
-                        ->maxLength(191),
-                    Forms\Components\Select::make('gender')
-                        ->label('Género')
-                        ->options([
-                            'Masculino' => 'Masculino',
-                            'Feminino' => 'Feminino',
-                        ])
-                        ->required(),
-                    Forms\Components\Select::make('rank_id')
-                        ->label('Patente')
-                        ->relationship('rank', 'name')
-                        ->searchable()
-                        ->preload(),
-                ])->columns(2),
+            \Filament\Schemas\Components\Wizard::make([
+                // Etapa 1 - Tipo de Formador
+                \Filament\Schemas\Components\Wizard\Step::make('Tipo de Formador')
+                    ->description('Selecione o tipo de formador')
+                    ->icon('heroicon-o-user-group')
+                    ->schema([
+                        Forms\Components\Select::make('trainer_type')
+                            ->label('Tipo de Formador')
+                            ->options([
+                                'Fardado' => 'Fardado',
+                                'Civil' => 'Civil',
+                            ])
+                            ->default('Fardado')
+                            ->required()
+                            ->live()
+                            ->columnSpanFull(),
+                    ]),
 
-            \Filament\Schemas\Components\Section::make('Informação Profissional')
-                ->schema([
-                    Forms\Components\TextInput::make('organ')
-                        ->label('Órgão/Unidade')
-                        ->maxLength(191),
-                    Forms\Components\Select::make('education_level')
-                        ->label('Nível Académico')
-                        ->options([
-                            '12ª Classe' => '12ª Classe',
-                            'Técnico Médio' => 'Técnico Médio',
-                            'Bacharelato' => 'Bacharelato',
-                            'Licenciatura' => 'Licenciatura',
-                            'Mestrado' => 'Mestrado',
-                            'Doutoramento' => 'Doutoramento',
-                        ])
-                        ->searchable()
-                        ->required(),
-                    Forms\Components\TextInput::make('phone')
-                        ->label('Telefone')
-                        ->tel()
-                        ->prefix('+244')
-                        ->placeholder('9XX XXX XXX')
-                        ->mask('999 999 999')
-                        ->maxLength(191)
-                        ->required(),
-                    Forms\Components\Select::make('trainer_type')
-                        ->label('Tipo de Formador')
-                        ->options([
-                            'interno' => 'Interno',
-                            'externo' => 'Externo',
-                        ])
-                        ->required(),
-                    Forms\Components\Toggle::make('is_active')
-                        ->label('Activo')
-                        ->default(true)
-                        ->required(),
-                ])->columns(2),
+                // Etapa 2 - Identificação
+                \Filament\Schemas\Components\Wizard\Step::make('Identificação')
+                    ->description('Dados pessoais do formador')
+                    ->icon('heroicon-o-identification')
+                    ->schema([
+                        Forms\Components\FileUpload::make('photo')
+                            ->label('Foto')
+                            ->image()
+                            ->avatar()
+                            ->directory('trainers')
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('full_name')
+                            ->label('Nome Completo')
+                            ->required()
+                            ->maxLength(191)
+                            ->unique(ignoreRecord: true)
+                            ->validationMessages([
+                                'unique' => 'Já existe um formador com este nome.',
+                            ]),
+                        Forms\Components\Select::make('gender')
+                            ->label('Género')
+                            ->options([
+                                'Masculino' => 'Masculino',
+                                'Feminino' => 'Feminino',
+                            ])
+                            ->required(),
+                    ])->columns(2),
+
+                // Etapa 3 - Dados Profissionais
+                \Filament\Schemas\Components\Wizard\Step::make('Dados Profissionais')
+                    ->description('Informações profissionais')
+                    ->icon('heroicon-o-briefcase')
+                    ->schema([
+                        // Campos para Fardado
+                        Forms\Components\TextInput::make('nip')
+                            ->label('NIP')
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(191)
+                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('trainer_type') === 'Fardado'),
+                        Forms\Components\Select::make('rank_id')
+                            ->label('Patente')
+                            ->relationship('rank', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('trainer_type') === 'Fardado'),
+                        Forms\Components\Select::make('organ')
+                            ->label('Órgão/Unidade')
+                            ->options([
+                                'Comando Geral' => 'Comando Geral',
+                                'Direcção de Pessoal e Quadros' => 'Direcção de Pessoal e Quadros',
+                                'Direcção de Instrução e Ensino' => 'Direcção de Instrução e Ensino',
+                                'Comando Provincial de Luanda' => 'Comando Provincial de Luanda',
+                            ])
+                            ->searchable()
+                            ->preload(),
+                        // Campo para Civil
+                        Forms\Components\TextInput::make('bilhete')
+                            ->label('Bilhete de Identidade')
+                            ->maxLength(191)
+                            ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('trainer_type') === 'Civil'),
+                    ])->columns(2),
+
+                // Etapa 4 - Finalização
+                \Filament\Schemas\Components\Wizard\Step::make('Finalização')
+                    ->description('Informações adicionais')
+                    ->icon('heroicon-o-check-circle')
+                    ->schema([
+                        Forms\Components\Select::make('education_level')
+                            ->label('Nível Académico')
+                            ->options([
+                                '12ª Classe' => '12ª Classe',
+                                'Ensino Médio Técnico' => 'Ensino Médio Técnico',
+                                'Bacharelato' => 'Bacharelato',
+                                'Licenciatura' => 'Licenciatura',
+                                'Pós-Graduação' => 'Pós-Graduação',
+                                'Mestrado' => 'Mestrado',
+                                'Doutoramento' => 'Doutoramento',
+                            ])
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Telefone')
+                            ->tel()
+                            ->prefix('+244')
+                            ->placeholder('9XX XXX XXX')
+                            ->mask('999 999 999')
+                            ->maxLength(191)
+                            ->required(),
+                        Forms\Components\Toggle::make('is_active')
+                            ->label('Activo')
+                            ->default(true)
+                            ->required(),
+                    ])->columns(3),
+            ])->columnSpanFull()->skippable(),
         ];
     }
 }

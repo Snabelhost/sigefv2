@@ -56,27 +56,37 @@ class CandidateResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('photo')
                     ->label('Foto')
-                    ->circular(),
+                    ->circular()
+                    ->size(40)
+                    ->defaultImageUrl(function ($record) {
+                        $name = $record->full_name ?? 'Alistado';
+                        return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=0D47A1&color=fff&size=128&bold=true';
+                    }),
                 Tables\Columns\TextColumn::make('full_name')
                     ->label('Nome Completo')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('id_number')
                     ->label('Nº BI')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('recruitmentType.name')
-                    ->label('Recrutamento')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('Telefone')
+                    ->searchable()
+                    ->icon('heroicon-o-phone'),
                 Tables\Columns\TextColumn::make('gender')
-                    ->label('Género'),
-                Tables\Columns\TextColumn::make('status')
+                    ->label('Género')
+                    ->badge()
+                    ->color(fn ($state) => $state === 'Masculino' ? 'info' : 'danger'),
+                Tables\Columns\TextColumn::make('student_type')
                     ->label('Estado')
-                    ->colors([
-                        'warning' => 'pending',
-                        'success' => 'approved',
-                        'danger' => 'rejected',
-                        'info' => 'admitted',
-                    ]),
+                    ->badge()
+                    ->color('success'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Data Registo')
+                    ->dateTime('d/m/Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
 
             ->filters([])
