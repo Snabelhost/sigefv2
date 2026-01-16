@@ -95,7 +95,66 @@ class CandidateResource extends Resource
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->createAnotherAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-plus-circle')->label('Salvar e criar outro'))
                     ->createAnother(true)
-                    ->successNotificationTitle('Registo criado com sucesso!'),
+                    ->successNotificationTitle('Alistado criado com sucesso!')
+                    ->after(function (\App\Models\Candidate $record) {
+                        // Enviar SMS ao alistado após criar
+                        $phone = $record->phone;
+                        
+                        if (!empty($phone)) {
+                            $candidateName = $record->full_name ?? 'Alistado';
+                            
+                            // Buscar nome da instituição
+                            $institutionName = 'Escola de Formacao da Policia Nacional';
+                            if ($record->institution_id) {
+                                $institution = \App\Models\Institution::find($record->institution_id);
+                                if ($institution) {
+                                    $institutionName = $institution->name;
+                                }
+                            }
+                            
+                            // Remover acentos
+                            $removeAccents = fn($str) => strtr($str, [
+                                'ã' => 'a', 'á' => 'a', 'à' => 'a', 'â' => 'a',
+                                'é' => 'e', 'ê' => 'e', 'í' => 'i', 'ó' => 'o',
+                                'ô' => 'o', 'õ' => 'o', 'ú' => 'u', 'ç' => 'c',
+                                'Ã' => 'A', 'Á' => 'A', 'À' => 'A', 'Â' => 'A',
+                                'É' => 'E', 'Ê' => 'E', 'Í' => 'I', 'Ó' => 'O',
+                                'Ô' => 'O', 'Õ' => 'O', 'Ú' => 'U', 'Ç' => 'C',
+                            ]);
+                            
+                            $institutionName = $removeAccents($institutionName);
+                            $candidateName = $removeAccents($candidateName);
+                            
+                            try {
+                                $smsService = new \App\Services\SmsService();
+                                $result = $smsService->sendAgentRegistrationNotification(
+                                    $phone,
+                                    $candidateName,
+                                    $institutionName
+                                );
+                                
+                                if ($result['success']) {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('SMS enviado')
+                                        ->body("Notificacao enviada para {$phone}")
+                                        ->success()
+                                        ->send();
+                                } else {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Falha ao enviar SMS')
+                                        ->body("Nao foi possivel enviar SMS. Detalhes: " . ($result['message'] ?? 'Erro desconhecido'))
+                                        ->warning()
+                                        ->send();
+                                }
+                            } catch (\Exception $e) {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Erro ao enviar SMS')
+                                    ->body("Erro: " . $e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }
+                    }),
             ])
             ->actions([
                 \Filament\Actions\EditAction::make()
