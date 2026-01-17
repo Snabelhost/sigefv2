@@ -113,13 +113,6 @@
       0 => 'Filament\\Tables\\TablesServiceProvider',
     ),
   ),
-  'filament/upgrade' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Filament\\Upgrade\\UpgradeServiceProvider',
-    ),
-  ),
   'filament/widgets' => 
   array (
     'providers' => 
@@ -187,6 +180,13 @@
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
     ),
   ),
+  'owen-it/laravel-auditing' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'OwenIt\\Auditing\\AuditingServiceProvider',
+    ),
+  ),
   'ryangjchandler/blade-capture-directive' => 
   array (
     'aliases' => 
@@ -203,6 +203,13 @@
     'providers' => 
     array (
       0 => 'Spatie\\Permission\\PermissionServiceProvider',
+    ),
+  ),
+  'tapp/filament-auditing' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Tapp\\FilamentAuditing\\FilamentAuditingServiceProvider',
     ),
   ),
 );
