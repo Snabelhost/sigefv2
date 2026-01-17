@@ -94,7 +94,34 @@ class CourseResource extends Resource
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->successNotificationTitle('Curso atualizado com sucesso!'),
-                \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
+                \Filament\Actions\DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->before(function (Course $record, \Filament\Actions\DeleteAction $action) {
+                        // Verificar se há mapas de curso vinculados
+                        $courseMapsCount = \App\Models\CourseMap::where('course_id', $record->id)->count();
+                        
+                        // Verificar se há fases de curso vinculadas
+                        $phasesCount = \App\Models\CoursePhase::where('course_id', $record->id)->count();
+                        
+                        // Verificar se há planos de curso vinculados
+                        $plansCount = \App\Models\CoursePlan::where('course_id', $record->id)->count();
+                        
+                        if ($courseMapsCount > 0 || $phasesCount > 0 || $plansCount > 0) {
+                            $messages = [];
+                            if ($courseMapsCount > 0) $messages[] = "$courseMapsCount mapa(s) de curso";
+                            if ($phasesCount > 0) $messages[] = "$phasesCount fase(s)";
+                            if ($plansCount > 0) $messages[] = "$plansCount plano(s)";
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->danger()
+                                ->title('Não é possível excluir')
+                                ->body('Este curso está vinculado a: ' . implode(', ', $messages) . '. Remova as dependências primeiro.')
+                                ->persistent()
+                                ->send();
+                            
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

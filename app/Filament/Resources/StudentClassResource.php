@@ -47,20 +47,14 @@ class StudentClassResource extends Resource
                             ->required()
                             ->searchable()
                             ->preload(),
-                        Forms\Components\Select::make('course_map_id')
-                            ->label('Mapa de Curso')
-                            ->relationship('courseMap', 'id')
-                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->full_title)
-                            ->required()
-                            ->searchable()
-                            ->preload(),
                         Forms\Components\Select::make('academic_year_id')
                             ->label('Ano Académico')
                             ->relationship('academicYear', 'year')
                             ->required()
                             ->searchable()
                             ->preload(),
-                    ])->columns(2),
+                    ])->columns(2)
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -77,9 +71,6 @@ class StudentClassResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('institution.name')
                     ->label('Escola')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('courseMap.full_title')
-                    ->label('Mapa de Curso')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('academicYear.year')
                     ->label('Ano')
@@ -131,6 +122,3 @@ class StudentClassResource extends Resource
         ];
     }
 }
-
-
-

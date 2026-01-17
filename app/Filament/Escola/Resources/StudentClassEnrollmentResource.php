@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Escola\Resources;
 
-use App\Filament\Resources\StudentClassEnrollmentResource\Pages;
+use App\Filament\Escola\Resources\StudentClassEnrollmentResource\Pages;
 use App\Models\StudentClassEnrollment;
 use App\Models\Student;
 use App\Models\StudentClass;
@@ -17,6 +17,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Facades\Filament;
 
 class StudentClassEnrollmentResource extends Resource
 {
@@ -53,7 +54,10 @@ class StudentClassEnrollmentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $tenant = Filament::getTenant();
+        
         return Student::query()
+            ->where('institution_id', $tenant?->id)
             ->whereHas('classEnrollments')
             ->with(['candidate', 'institution', 'currentPhase', 'classEnrollments.studentClass.courseMap.course', 'classEnrollments.coursePhase'])
             ->withCount(['classEnrollments', 'subjectEnrollments'])
@@ -102,6 +106,7 @@ class StudentClassEnrollmentResource extends Resource
     public static function table(Table $table): Table
     {
         $typeColors = self::getStudentTypeColors();
+        $tenant = Filament::getTenant();
         
         return $table
             ->deferLoading()
@@ -142,11 +147,6 @@ class StudentClassEnrollmentResource extends Resource
                 Tables\Filters\SelectFilter::make('student_type')
                     ->label('Estado do Aluno')
                     ->options(fn () => self::getStudentTypeOptions()),
-                Tables\Filters\SelectFilter::make('institution_id')
-                    ->label('Instituição')
-                    ->relationship('institution', 'name')
-                    ->searchable()
-                    ->preload(),
             ])
             ->headerActions([
                 \Filament\Actions\Action::make('novaInscricao')
@@ -154,207 +154,199 @@ class StudentClassEnrollmentResource extends Resource
                     ->label('Nova Inscrição')
                     ->modalHeading('Inscrever Aluno em Turma')
                     ->modalWidth('3xl')
-                    ->form([
-                        // Aluno - linha inteira
-                        Forms\Components\Select::make('student_id')
-                            ->label('Aluno')
-                            ->options(function () {
-                                return Student::with('candidate')
-                                    ->limit(100)
-                                    ->get()
-                                    ->mapWithKeys(fn ($s) => [
-                                        $s->id => ($s->candidate->full_name ?? 'N/A') . ' - ' . $s->student_number . ' (' . ($s->candidate->student_type ?? 'N/A') . ')'
-                                    ]);
-                            })
-                            ->searchable()
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(function ($state, $set) {
-                                if ($state) {
-                                    $student = Student::with('candidate')->find($state);
-                                    $candidateType = $student?->candidate?->student_type;
-                                    
-                                    // Auto-preencher Estado baseado no tipo do candidato
-                                    if ($candidateType === 'Agente') {
-                                        // Buscar estado "Formando - superior" ou similar
-                                        $formandoType = StudentType::where('name', 'like', '%Formando%')
-                                            ->where('name', 'like', '%superior%')
-                                            ->first();
-                                        if ($formandoType) {
-                                            $set('student_type', $formandoType->name);
-                                        }
-                                    } elseif ($candidateType === 'Alistado') {
-                                        // Buscar estado "Recruta"
-                                        $recrutaType = StudentType::where('name', 'like', '%Recruta%')->first();
-                                        if ($recrutaType) {
-                                            $set('student_type', $recrutaType->name);
-                                        }
-                                    }
-                                }
-                            })
-                            ->columnSpanFull(),
-                        
-                        // Estado e Curso
-                        \Filament\Schemas\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\Select::make('student_type')
-                                    ->label('Estado do Aluno')
-                                    ->options(function ($get) {
-                                        $studentId = $get('student_id');
-                                        if (!$studentId) {
-                                            return StudentType::where('is_active', true)->orderBy('order')->pluck('name', 'name')->toArray();
-                                        }
-                                        
-                                        $student = Student::with('candidate')->find($studentId);
+                    ->form(function () use ($tenant) {
+                        return [
+                            // Aluno - linha inteira
+                            Forms\Components\Select::make('student_id')
+                                ->label('Aluno')
+                                ->options(function () use ($tenant) {
+                                    return Student::with('candidate')
+                                        ->where('institution_id', $tenant?->id)
+                                        ->limit(100)
+                                        ->get()
+                                        ->mapWithKeys(fn ($s) => [
+                                            $s->id => ($s->candidate->full_name ?? 'N/A') . ' - ' . $s->student_number . ' (' . ($s->candidate->student_type ?? 'N/A') . ')'
+                                        ]);
+                                })
+                                ->searchable()
+                                ->required()
+                                ->live()
+                                ->afterStateUpdated(function ($state, $set) {
+                                    if ($state) {
+                                        $student = Student::with('candidate')->find($state);
                                         $candidateType = $student?->candidate?->student_type;
                                         
-                                        // Filtrar opções baseado no tipo do candidato
                                         if ($candidateType === 'Agente') {
-                                            // Agentes só podem ter estados de Formando/Superior
-                                            return StudentType::where('is_active', true)
-                                                ->where(function ($q) {
-                                                    $q->where('name', 'like', '%Formando%')
-                                                      ->orWhere('name', 'like', '%Instruendo%');
-                                                })
-                                                ->orderBy('order')
-                                                ->pluck('name', 'name')
-                                                ->toArray();
+                                            $formandoType = StudentType::where('name', 'like', '%Formando%')
+                                                ->where('name', 'like', '%superior%')
+                                                ->first();
+                                            if ($formandoType) {
+                                                $set('student_type', $formandoType->name);
+                                            }
                                         } elseif ($candidateType === 'Alistado') {
-                                            // Alistados só podem ter estados de Recruta/Instruendo básico
-                                            return StudentType::where('is_active', true)
-                                                ->where(function ($q) {
-                                                    $q->where('name', 'like', '%Recruta%')
-                                                      ->orWhere('name', 'like', '%Instruendo%');
-                                                })
-                                                ->whereNot('name', 'like', '%superior%')
-                                                ->orderBy('order')
-                                                ->pluck('name', 'name')
-                                                ->toArray();
-                                        }
-                                        
-                                        return StudentType::where('is_active', true)->orderBy('order')->pluck('name', 'name')->toArray();
-                                    })
-                                    ->required()
-                                    ->live()
-                                    ->helperText(function ($get) {
-                                        $studentId = $get('student_id');
-                                        if ($studentId) {
-                                            $student = Student::with('candidate')->find($studentId);
-                                            $candidateType = $student?->candidate?->student_type ?? 'N/A';
-                                            return "Tipo: $candidateType";
-                                        }
-                                        return 'Seleccione um aluno primeiro';
-                                    })
-                                    ->afterStateUpdated(function ($state, $set, $get) {
-                                        if ($state) {
-                                            // Buscar fase do curso selecionado
-                                            $courseId = $get('course_id');
-                                            if ($courseId) {
-                                                if (str_contains(strtolower($state), 'recruta')) {
-                                                    $phase = CoursePhase::where('course_id', $courseId)->where('name', 'like', '%1%')->first();
-                                                    if ($phase) $set('course_phase_id', $phase->id);
-                                                } elseif (str_contains(strtolower($state), 'instruendo')) {
-                                                    $phase = CoursePhase::where('course_id', $courseId)->where('name', 'like', '%2%')->first();
-                                                    if ($phase) $set('course_phase_id', $phase->id);
-                                                }
+                                            $recrutaType = StudentType::where('name', 'like', '%Recruta%')->first();
+                                            if ($recrutaType) {
+                                                $set('student_type', $recrutaType->name);
                                             }
                                         }
-                                    }),
-                                Forms\Components\Select::make('course_id')
-                                    ->label('Curso')
-                                    ->options(fn () => \App\Models\Course::pluck('name', 'id'))
-                                    ->searchable()
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(function ($set) {
-                                        $set('class_id', null);
-                                        $set('course_phase_id', null);
-                                        $set('subject_ids', []);
-                                    }),
-                            ]),
-                        
-                        // Turma e Fase (filtradas pelo curso)
-                        \Filament\Schemas\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\Select::make('class_id')
-                                    ->label('Turma')
-                                    ->options(function ($get) {
-                                        $courseId = $get('course_id');
-                                        if (!$courseId) {
-                                            return [];
-                                        }
-                                        // Filtrar turmas pelo curso através do courseMap
-                                        return StudentClass::whereHas('courseMap', fn ($q) => $q->where('course_id', $courseId))
-                                            ->pluck('name', 'id');
-                                    })
-                                    ->searchable()
-                                    ->required()
-                                    ->helperText('Seleccione o curso primeiro'),
-                                Forms\Components\Select::make('course_phase_id')
-                                    ->label('Fase do Curso')
-                                    ->options(function ($get) {
-                                        $courseId = $get('course_id');
-                                        if (!$courseId) {
-                                            return [];
-                                        }
-                                        return CoursePhase::where('course_id', $courseId)->pluck('name', 'id');
-                                    })
-                                    ->searchable()
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(fn ($set) => $set('subject_ids', []))
-                                    ->helperText('Seleccione o curso primeiro'),
-                            ]),
-                        
-                        // Sala e Ano
-                        \Filament\Schemas\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\TextInput::make('classroom')
-                                    ->label('Sala de Aula')
-                                    ->maxLength(50),
-                                Forms\Components\Select::make('academic_year_id')
-                                    ->label('Ano Académico')
-                                    ->options(fn () => AcademicYear::where('is_active', true)->pluck('name', 'id'))
-                                    ->searchable()
-                                    ->required(),
-                            ]),
-                        
-                        // Disciplinas - última linha inteira (filtradas pela fase)
-                        Forms\Components\Select::make('subject_ids')
-                            ->label('Disciplinas')
-                            ->options(function ($get) {
-                                $coursePhaseId = $get('course_phase_id');
-                                $courseId = $get('course_id');
-                                
-                                // Se tiver fase selecionada, mostrar apenas disciplinas dessa fase
-                                if ($coursePhaseId) {
-                                    $subjects = Subject::where('course_phase_id', $coursePhaseId)->pluck('name', 'id');
-                                    if ($subjects->count() > 0) {
-                                        return $subjects;
                                     }
-                                }
-                                
-                                // Se tiver apenas curso, mostrar disciplinas de todas as fases do curso
-                                if ($courseId) {
-                                    $coursePhaseIds = CoursePhase::where('course_id', $courseId)->pluck('id');
-                                    if ($coursePhaseIds->count() > 0) {
-                                        $subjects = Subject::whereIn('course_phase_id', $coursePhaseIds)->pluck('name', 'id');
+                                })
+                                ->columnSpanFull(),
+                            
+                            // Estado e Curso
+                            \Filament\Schemas\Components\Grid::make(2)
+                                ->schema([
+                                    Forms\Components\Select::make('student_type')
+                                        ->label('Estado do Aluno')
+                                        ->options(function ($get) {
+                                            $studentId = $get('student_id');
+                                            if (!$studentId) {
+                                                return StudentType::where('is_active', true)->orderBy('order')->pluck('name', 'name')->toArray();
+                                            }
+                                            
+                                            $student = Student::with('candidate')->find($studentId);
+                                            $candidateType = $student?->candidate?->student_type;
+                                            
+                                            if ($candidateType === 'Agente') {
+                                                return StudentType::where('is_active', true)
+                                                    ->where(function ($q) {
+                                                        $q->where('name', 'like', '%Formando%')
+                                                          ->orWhere('name', 'like', '%Instruendo%');
+                                                    })
+                                                    ->orderBy('order')
+                                                    ->pluck('name', 'name')
+                                                    ->toArray();
+                                            } elseif ($candidateType === 'Alistado') {
+                                                return StudentType::where('is_active', true)
+                                                    ->where(function ($q) {
+                                                        $q->where('name', 'like', '%Recruta%')
+                                                          ->orWhere('name', 'like', '%Instruendo%');
+                                                    })
+                                                    ->whereNot('name', 'like', '%superior%')
+                                                    ->orderBy('order')
+                                                    ->pluck('name', 'name')
+                                                    ->toArray();
+                                            }
+                                            
+                                            return StudentType::where('is_active', true)->orderBy('order')->pluck('name', 'name')->toArray();
+                                        })
+                                        ->required()
+                                        ->live()
+                                        ->helperText(function ($get) {
+                                            $studentId = $get('student_id');
+                                            if ($studentId) {
+                                                $student = Student::with('candidate')->find($studentId);
+                                                $candidateType = $student?->candidate?->student_type ?? 'N/A';
+                                                return "Tipo: $candidateType";
+                                            }
+                                            return 'Seleccione um aluno primeiro';
+                                        })
+                                        ->afterStateUpdated(function ($state, $set, $get) {
+                                            if ($state) {
+                                                $courseId = $get('course_id');
+                                                if ($courseId) {
+                                                    if (str_contains(strtolower($state), 'recruta')) {
+                                                        $phase = CoursePhase::where('course_id', $courseId)->where('name', 'like', '%1%')->first();
+                                                        if ($phase) $set('course_phase_id', $phase->id);
+                                                    } elseif (str_contains(strtolower($state), 'instruendo')) {
+                                                        $phase = CoursePhase::where('course_id', $courseId)->where('name', 'like', '%2%')->first();
+                                                        if ($phase) $set('course_phase_id', $phase->id);
+                                                    }
+                                                }
+                                            }
+                                        }),
+                                    Forms\Components\Select::make('course_id')
+                                        ->label('Curso')
+                                        ->options(fn () => \App\Models\Course::pluck('name', 'id'))
+                                        ->searchable()
+                                        ->required()
+                                        ->live()
+                                        ->afterStateUpdated(function ($set) {
+                                            $set('class_id', null);
+                                            $set('course_phase_id', null);
+                                            $set('subject_ids', []);
+                                        }),
+                                ]),
+                            
+                            // Turma e Fase (filtradas pelo curso e escola)
+                            \Filament\Schemas\Components\Grid::make(2)
+                                ->schema([
+                                    Forms\Components\Select::make('class_id')
+                                        ->label('Turma')
+                                        ->options(function ($get) use ($tenant) {
+                                            $courseId = $get('course_id');
+                                            if (!$courseId) {
+                                                return [];
+                                            }
+                                            return StudentClass::where('institution_id', $tenant?->id)
+                                                ->whereHas('courseMap', fn ($q) => $q->where('course_id', $courseId))
+                                                ->pluck('name', 'id');
+                                        })
+                                        ->searchable()
+                                        ->required()
+                                        ->helperText('Seleccione o curso primeiro'),
+                                    Forms\Components\Select::make('course_phase_id')
+                                        ->label('Fase do Curso')
+                                        ->options(function ($get) {
+                                            $courseId = $get('course_id');
+                                            if (!$courseId) {
+                                                return [];
+                                            }
+                                            return CoursePhase::where('course_id', $courseId)->pluck('name', 'id');
+                                        })
+                                        ->searchable()
+                                        ->required()
+                                        ->live()
+                                        ->afterStateUpdated(fn ($set) => $set('subject_ids', []))
+                                        ->helperText('Seleccione o curso primeiro'),
+                                ]),
+                            
+                            // Sala e Ano
+                            \Filament\Schemas\Components\Grid::make(2)
+                                ->schema([
+                                    Forms\Components\TextInput::make('classroom')
+                                        ->label('Sala de Aula')
+                                        ->maxLength(50),
+                                    Forms\Components\Select::make('academic_year_id')
+                                        ->label('Ano Académico')
+                                        ->options(fn () => AcademicYear::where('is_active', true)->pluck('name', 'id'))
+                                        ->searchable()
+                                        ->required(),
+                                ]),
+                            
+                            // Disciplinas - última linha inteira
+                            Forms\Components\Select::make('subject_ids')
+                                ->label('Disciplinas')
+                                ->options(function ($get) {
+                                    $coursePhaseId = $get('course_phase_id');
+                                    $courseId = $get('course_id');
+                                    
+                                    if ($coursePhaseId) {
+                                        $subjects = Subject::where('course_phase_id', $coursePhaseId)->pluck('name', 'id');
                                         if ($subjects->count() > 0) {
                                             return $subjects;
                                         }
                                     }
-                                }
-                                
-                                // Se não houver disciplinas, retornar vazio
-                                return [];
-                            })
-                            ->multiple()
-                            ->searchable()
-                            ->columnSpanFull()
-                            ->helperText('Disciplinas da fase selecionada'),
-                    ])
+                                    
+                                    if ($courseId) {
+                                        $coursePhaseIds = CoursePhase::where('course_id', $courseId)->pluck('id');
+                                        if ($coursePhaseIds->count() > 0) {
+                                            $subjects = Subject::whereIn('course_phase_id', $coursePhaseIds)->pluck('name', 'id');
+                                            if ($subjects->count() > 0) {
+                                                return $subjects;
+                                            }
+                                        }
+                                    }
+                                    
+                                    return [];
+                                })
+                                ->multiple()
+                                ->searchable()
+                                ->columnSpanFull()
+                                ->helperText('Disciplinas da fase selecionada'),
+                        ];
+                    })
                     ->action(function (array $data): void {
-                        // Actualizar tipo do aluno
                         $student = Student::find($data['student_id']);
                         if ($student) {
                             $student->update([
@@ -363,7 +355,6 @@ class StudentClassEnrollmentResource extends Resource
                             ]);
                         }
                         
-                        // Criar inscrição na turma
                         StudentClassEnrollment::updateOrCreate(
                             [
                                 'student_id' => $data['student_id'],
@@ -380,7 +371,6 @@ class StudentClassEnrollmentResource extends Resource
                             ]
                         );
                         
-                        // Inscrever nas disciplinas
                         $subjectIds = $data['subject_ids'] ?? [];
                         foreach ($subjectIds as $subjectId) {
                             StudentSubjectEnrollment::updateOrCreate(
@@ -428,41 +418,32 @@ class StudentClassEnrollmentResource extends Resource
                     ->form(function (Student $record) {
                         $lastEnrollment = $record->classEnrollments()->with('studentClass.courseMap.course.phases')->latest()->first();
                         
-                        // Buscar o curso do aluno através da última inscrição
                         $courseId = $lastEnrollment?->studentClass?->courseMap?->course_id;
                         $courseName = $lastEnrollment?->studentClass?->courseMap?->course?->name ?? 'Não definido';
                         
-                        // Buscar disciplinas já inscritas do aluno
                         $existingSubjectIds = $record->subjectEnrollments()
                             ->where('is_active', true)
                             ->pluck('subject_id')
                             ->toArray();
                         
-                        // Buscar disciplinas do curso através das fases (CoursePhase)
-                        // As disciplinas têm course_phase_id que liga às fases do curso
                         $courseSubjectOptions = collect();
                         
                         if ($courseId) {
-                            // Buscar todas as fases deste curso
                             $coursePhaseIds = CoursePhase::where('course_id', $courseId)->pluck('id');
                             
                             if ($coursePhaseIds->count() > 0) {
-                                // Buscar disciplinas dessas fases
                                 $courseSubjectOptions = Subject::whereIn('course_phase_id', $coursePhaseIds)
                                     ->pluck('name', 'id');
                             }
                         }
                         
-                        // Combinar disciplinas do curso + disciplinas que o aluno já tem
                         $existingSubjects = Subject::whereIn('id', $existingSubjectIds)->pluck('name', 'id');
                         $subjectOptions = $courseSubjectOptions->union($existingSubjects);
                         
-                        // Se não houver disciplinas, mostrar todas como fallback
                         if ($subjectOptions->isEmpty()) {
                             $subjectOptions = Subject::pluck('name', 'id');
                         }
                         
-                        // Buscar fases do curso para o dropdown
                         $coursePhaseOptions = collect();
                         if ($courseId) {
                             $coursePhaseOptions = CoursePhase::where('course_id', $courseId)->pluck('name', 'id');

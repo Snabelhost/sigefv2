@@ -88,6 +88,8 @@ class CandidateResource extends Resource
                                     'manual' => 'Manual - Preencher todos os dados',
                                 ])
                                 ->default('manual')
+                                ->afterStateHydrated(fn ($component, $state) => $component->state($state ?? 'manual'))
+                                ->dehydrated(false) // Não salvar este campo na base de dados
                                 ->live()
                                 ->columnSpanFull(),
                             
@@ -338,8 +340,7 @@ class CandidateResource extends Resource
                                 ->directory('candidates/documents/registro_criminal'),
                         ])->columns(2),
                 ])
-                ->columnSpanFull()
-                ->skippable(),
+                ->columnSpanFull(),
             ]);
     }
 

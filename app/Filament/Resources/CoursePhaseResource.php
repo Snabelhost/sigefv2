@@ -91,7 +91,35 @@ class CoursePhaseResource extends Resource
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->successNotificationTitle('Registo atualizado com sucesso!'),
-                \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
+                \Filament\Actions\DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->before(function (CoursePhase $record, \Filament\Actions\DeleteAction $action) {
+                        // Verificar se há alunos usando esta fase
+                        $studentsCount = \App\Models\Student::where('current_phase_id', $record->id)->count();
+                        
+                        // Verificar se há disciplinas usando esta fase
+                        $subjectsCount = \App\Models\Subject::where('course_phase_id', $record->id)->count();
+                        
+                        // Verificar se há inscrições usando esta fase
+                        $enrollmentsCount = \App\Models\StudentClassEnrollment::where('course_phase_id', $record->id)->count() +
+                                           \App\Models\StudentSubjectEnrollment::where('course_phase_id', $record->id)->count();
+                        
+                        if ($studentsCount > 0 || $subjectsCount > 0 || $enrollmentsCount > 0) {
+                            $messages = [];
+                            if ($studentsCount > 0) $messages[] = "$studentsCount aluno(s)";
+                            if ($subjectsCount > 0) $messages[] = "$subjectsCount disciplina(s)";
+                            if ($enrollmentsCount > 0) $messages[] = "$enrollmentsCount inscrição(ões)";
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->danger()
+                                ->title('Não é possível excluir')
+                                ->body('Esta fase está vinculada a: ' . implode(', ', $messages) . '. Remova as dependências primeiro.')
+                                ->persistent()
+                                ->send();
+                            
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([

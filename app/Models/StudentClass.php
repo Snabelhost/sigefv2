@@ -14,6 +14,7 @@ class StudentClass extends Model
     protected $fillable = [
         'institution_id',
         'course_map_id',
+        'course_plan_id',
         'name',
         'academic_year_id',
     ];
@@ -26,6 +27,11 @@ class StudentClass extends Model
     public function courseMap()
     {
         return $this->belongsTo(CourseMap::class);
+    }
+
+    public function coursePlan()
+    {
+        return $this->belongsTo(CoursePlan::class);
     }
 
     public function academicYear()

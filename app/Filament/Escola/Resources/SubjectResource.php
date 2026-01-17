@@ -39,7 +39,13 @@ class SubjectResource extends Resource
                             ->suffix('horas'),
                         Forms\Components\Select::make('course_phase_id')
                             ->label('Fase do Curso')
-                            ->relationship('phase', 'name')
+                            ->options(function () {
+                                return \App\Models\CoursePhase::with('course')
+                                    ->get()
+                                    ->mapWithKeys(fn ($phase) => [
+                                        $phase->id => ($phase->course?->name ?? 'Sem Curso') . ' - ' . $phase->name
+                                    ]);
+                            })
                             ->searchable()
                             ->preload(),
                     ])->columns(2),

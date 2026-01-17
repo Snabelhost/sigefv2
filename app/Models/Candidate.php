@@ -13,6 +13,7 @@ class Candidate extends Model
         'institution_id',
         'recruitment_type_id',
         'full_name',
+        'student_number',
         'id_number',
         'gender',
         'birth_date',
