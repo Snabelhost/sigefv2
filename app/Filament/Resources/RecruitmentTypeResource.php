@@ -97,6 +97,16 @@ class RecruitmentTypeResource extends Resource
             'index' => Pages\ListRecruitmentTypes::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:RecruitmentType') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }
 
 

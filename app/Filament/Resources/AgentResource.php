@@ -470,4 +470,14 @@ class AgentResource extends Resource
             'index' => Pages\ListAgents::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:Agent') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

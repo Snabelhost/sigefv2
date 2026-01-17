@@ -47,8 +47,8 @@ return [
     'super_admin' => [
         'enabled' => true,
         'name' => 'super_admin',
-        'define_via_gate' => true,
-        'intercept_gate' => 'before',
+        'define_via_gate' => false, // Desabilitado - super_admin respeita permissões marcadas
+        'intercept_gate' => null,   // Sem bypass - permissões são verificadas normalmente
     ],
 
     /*

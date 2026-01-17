@@ -132,4 +132,14 @@ class CoursePlanResource extends Resource
             'index' => Pages\ListCoursePlans::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:CoursePlan') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

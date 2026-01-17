@@ -153,4 +153,14 @@ class EvaluationResource extends Resource
             'index' => Pages\ListEvaluations::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:Evaluation') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

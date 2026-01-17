@@ -151,4 +151,14 @@ class StudentLeaveResource extends Resource
             'index' => Pages\ListStudentLeaves::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:StudentLeave') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

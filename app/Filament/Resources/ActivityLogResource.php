@@ -22,6 +22,16 @@ class ActivityLogResource extends Resource
     protected static ?string $pluralModelLabel = 'Log de Atividades';
     protected static ?string $navigationLabel = 'Log de Atividades';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:ActivityLog') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with('user')->latest();

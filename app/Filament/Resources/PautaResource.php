@@ -91,4 +91,14 @@ class PautaResource extends Resource
             'pauta-geral' => Pages\PautaGeral::route('/{record}/pauta-geral'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:Pauta') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

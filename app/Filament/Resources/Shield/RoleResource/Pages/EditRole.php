@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Shield\RoleResource\Pages;
 
 use BezhanSalleh\FilamentShield\Resources\Roles\Pages\EditRole as BaseEditRole;
 use Spatie\Permission\PermissionRegistrar;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Artisan;
 
 class EditRole extends BaseEditRole
 {
@@ -20,25 +22,35 @@ class EditRole extends BaseEditRole
     }
 
     /**
-     * Limpa todos os caches relacionados a permissões.
+     * Limpa todos os caches relacionados a permissões de forma agressiva.
      */
     protected function forcePermissionCacheRefresh(): void
     {
-        // 1. Limpa o cache do Spatie Permission
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        // 1. Limpa o cache do Spatie Permission (método principal)
+        $registrar = app(PermissionRegistrar::class);
+        $registrar->forgetCachedPermissions();
         
-        // 2. Limpa o cache geral da aplicação relacionado a permissões
-        cache()->forget('spatie.permission.cache');
+        // 2. Força a reconfiguração do registrar
+        $registrar->setPermissionsTeamId(null);
         
-        // 3. Limpa caches do dashboard
-        cache()->forget('dashboard_stats');
-        cache()->forget('candidates_by_province_chart');
+        // 3. Limpa o cache de todas as chaves relacionadas a permissões
+        Cache::forget('spatie.permission.cache');
         
-        // 4. Log para debug
+        // 4. Limpa caches relacionados a views
+        Cache::flush(); // Limpa todo o cache (pode ser agressivo em produção)
+        
+        // 5. Limpa o cache de configuração do Filament
+        try {
+            Artisan::call('filament:cache-components');
+        } catch (\Exception $e) {
+            // Ignora se o comando falhar
+        }
+        
+        // 6. Log para debug
         logger()->info('Permission cache forcefully cleared after role edit', [
             'role_id' => $this->record->id,
             'role_name' => $this->record->name,
-            'permissions_count' => $this->record->permissions->count(),
+            'permissions_count' => $this->record->permissions()->count(),
         ]);
     }
 

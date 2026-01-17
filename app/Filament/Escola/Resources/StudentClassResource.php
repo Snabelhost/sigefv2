@@ -122,4 +122,14 @@ class StudentClassResource extends Resource
             'index' => Pages\ListStudentClasses::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:StudentClass') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

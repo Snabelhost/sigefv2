@@ -98,6 +98,16 @@ class InstitutionTypeResource extends Resource
             'index' => Pages\ListInstitutionTypes::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:InstitutionType') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }
 
 

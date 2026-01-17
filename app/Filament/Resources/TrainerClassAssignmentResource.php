@@ -319,4 +319,14 @@ class TrainerClassAssignmentResource extends Resource
             'index' => Pages\ListTrainerClassAssignments::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:TrainerClassAssignment') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

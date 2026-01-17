@@ -532,4 +532,14 @@ class StudentClassEnrollmentResource extends Resource
             'index' => Pages\ListStudentClassEnrollments::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:StudentClassEnrollment') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

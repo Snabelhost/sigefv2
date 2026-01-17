@@ -187,4 +187,14 @@ class CandidateResource extends Resource
             'index' => Pages\ListCandidates::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:Candidate') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

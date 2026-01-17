@@ -101,6 +101,16 @@ class ProvenanceResource extends Resource
             'index' => Pages\ListProvenances::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:Provenance') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }
 
 

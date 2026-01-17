@@ -111,4 +111,14 @@ class SelectionTestResource extends Resource
             'index' => Pages\ListSelectionTests::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:SelectionTest') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

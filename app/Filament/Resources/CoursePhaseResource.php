@@ -141,6 +141,16 @@ class CoursePhaseResource extends Resource
             'index' => Pages\ListCoursePhases::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:CoursePhase') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }
 
 

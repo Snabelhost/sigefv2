@@ -155,4 +155,14 @@ class StudentTypeResource extends Resource
             'index' => Pages\ListStudentTypes::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:StudentType') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

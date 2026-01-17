@@ -40,7 +40,7 @@ return [
     ],
 
     'resources' => [
-        'AuditResource' => AuditResource::class,
+        'AuditResource' => \App\Filament\Resources\AuditResource::class,
     ],
 
     'tenancy' => [

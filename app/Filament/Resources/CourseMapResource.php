@@ -193,4 +193,14 @@ class CourseMapResource extends Resource
             'index' => Pages\ListCourseMaps::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:CourseMap') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }

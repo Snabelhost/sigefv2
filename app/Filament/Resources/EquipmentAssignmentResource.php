@@ -138,6 +138,16 @@ class EquipmentAssignmentResource extends Resource
             'index' => Pages\ListEquipmentAssignments::route('/'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('ViewAny:EquipmentAssignment') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 }
 
 

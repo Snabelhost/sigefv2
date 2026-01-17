@@ -128,6 +128,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                \Tapp\FilamentAuditing\FilamentAuditingPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class, // Middleware customizado que redireciona para /login
