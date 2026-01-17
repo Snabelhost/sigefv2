@@ -149,12 +149,19 @@ class CandidateResource extends Resource
                             Forms\Components\TextInput::make('student_number')
                                 ->label('Nº de Ordem')
                                 ->maxLength(50)
-                                ->required(),
+                                ->required()
+                                ->unique(ignoreRecord: true)
+                                ->validationMessages([
+                                    'unique' => 'Já existe um candidato com este Nº de Ordem.',
+                                ]),
                             Forms\Components\TextInput::make('id_number')
                                 ->label('Nº do BI')
                                 ->unique(ignoreRecord: true)
                                 ->required()
-                                ->maxLength(191),
+                                ->maxLength(191)
+                                ->validationMessages([
+                                    'unique' => 'Já existe um candidato com este Nº de BI.',
+                                ]),
                             Forms\Components\DatePicker::make('birth_date')
                                 ->label('Data de Nascimento')
                                 ->required(),
@@ -220,12 +227,19 @@ class CandidateResource extends Resource
                                 ->placeholder('9XX XXX XXX')
                                 ->mask('999 999 999')
                                 ->maxLength(191)
-                                ->required(),
+                                ->required()
+                                ->unique(ignoreRecord: true)
+                                ->validationMessages([
+                                    'unique' => 'Já existe um candidato com este número de telefone.',
+                                ]),
                             Forms\Components\TextInput::make('email')
                                 ->label('E-mail')
                                 ->email()
                                 ->maxLength(191)
-                                ->unique(ignoreRecord: true),
+                                ->unique(ignoreRecord: true)
+                                ->validationMessages([
+                                    'unique' => 'Já existe um candidato com este e-mail.',
+                                ]),
                         ])->columns(2),
 
                     // Etapa 4 - Habilitações

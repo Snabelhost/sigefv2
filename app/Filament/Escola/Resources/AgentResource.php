@@ -140,6 +140,9 @@ class AgentResource extends Resource
                                     ->maxLength(50)
                                     ->required()
                                     ->unique(table: 'students', column: 'nuri', ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Já existe um agente com este NIP.',
+                                    ])
                                     ->default(fn ($record) => $record?->nuri)
                                     ->helperText('Número de Identificação Policial'),
 
@@ -147,6 +150,9 @@ class AgentResource extends Resource
                                     ->label('Nº de Ordem')
                                     ->required()
                                     ->unique(table: 'students', column: 'student_number', ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Já existe um agente com este Nº de Ordem.',
+                                    ])
                                     ->maxLength(191),
 
                                 // Escola é definida automaticamente
@@ -175,7 +181,11 @@ class AgentResource extends Resource
                                     ->placeholder('9XX XXX XXX')
                                     ->mask('999 999 999')
                                     ->maxLength(20)
-                                    ->required(),
+                                    ->required()
+                                    ->unique(table: 'students', column: 'phone', ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => 'Já existe um agente com este número de telefone.',
+                                    ]),
                                 
                                 // Campos ocultos necessários
                                 Forms\Components\Hidden::make('student_type')

@@ -151,18 +151,32 @@ class StudentClassEnrollmentResource extends Resource
             ->headerActions([
                 \Filament\Actions\Action::make('novaInscricao')
                     ->icon('heroicon-o-plus')
-                    ->label('Nova Inscrição')
+                    ->label(function () {
+                        $tenant = Filament::getTenant();
+                        // Contar alunos não inscritos desta escola
+                        $enrolledStudentIds = StudentClassEnrollment::distinct()->pluck('student_id');
+                        $notEnrolledCount = Student::where('institution_id', $tenant?->id)
+                            ->whereNotIn('id', $enrolledStudentIds)
+                            ->count();
+                        return "Nova Inscrição ($notEnrolledCount pendentes)";
+                    })
                     ->modalHeading('Inscrever Aluno em Turma')
                     ->modalWidth('3xl')
                     ->form(function () use ($tenant) {
+                        // Buscar alunos não inscritos desta escola
+                        $enrolledStudentIds = StudentClassEnrollment::distinct()->pluck('student_id');
+                        
                         return [
-                            // Aluno - linha inteira
+                            // Aluno - linha inteira (apenas não inscritos)
                             Forms\Components\Select::make('student_id')
-                                ->label('Aluno')
+                                ->label('Aluno (apenas não inscritos)')
                                 ->options(function () use ($tenant) {
+                                    // Buscar IDs dos alunos já inscritos
+                                    $enrolledStudentIds = StudentClassEnrollment::distinct()->pluck('student_id');
+                                    
                                     return Student::with('candidate')
                                         ->where('institution_id', $tenant?->id)
-                                        ->limit(100)
+                                        ->whereNotIn('id', $enrolledStudentIds)
                                         ->get()
                                         ->mapWithKeys(fn ($s) => [
                                             $s->id => ($s->candidate->full_name ?? 'N/A') . ' - ' . $s->student_number . ' (' . ($s->candidate->student_type ?? 'N/A') . ')'
@@ -191,6 +205,7 @@ class StudentClassEnrollmentResource extends Resource
                                         }
                                     }
                                 })
+                                ->helperText('Mostra apenas alunos que ainda não foram inscritos em nenhuma turma')
                                 ->columnSpanFull(),
                             
                             // Estado e Curso

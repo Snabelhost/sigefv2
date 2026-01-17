@@ -132,6 +132,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class, // Middleware customizado que redireciona para /login
                 \App\Http\Middleware\RefreshUserPermissions::class, // Atualiza permissões a cada request
+                \App\Http\Middleware\SingleSessionMiddleware::class, // Sessão única - invalida login em outros dispositivos
             ]);
     }
 }

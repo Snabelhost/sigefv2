@@ -51,6 +51,18 @@ class AppServiceProvider extends ServiceProvider
         // Registrar Event Subscriber para limpar cache quando permissões são alteradas
         Event::subscribe(PermissionEventSubscriber::class);
         
+        // Registrar listener para controle de sessão única (Single Session)
+        Event::listen(
+            \Illuminate\Auth\Events\Login::class,
+            \App\Listeners\UpdateUserSessionOnLogin::class
+        );
+        
+        // Registrar listener para log de logout
+        Event::listen(
+            \Illuminate\Auth\Events\Logout::class,
+            \App\Listeners\LogUserLogout::class
+        );
+        
         // Registrar CSS personalizado do SIGEF em todos os painéis Filament (no HEAD)
         FilamentView::registerRenderHook(
             PanelsRenderHook::HEAD_END,

@@ -80,6 +80,9 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         'institution_id',
         'phone',
         'is_active',
+        'current_session_id',
+        'last_login_at',
+        'last_login_ip',
     ];
 
     /**
