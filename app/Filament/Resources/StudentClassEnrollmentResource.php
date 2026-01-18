@@ -507,8 +507,8 @@ class StudentClassEnrollmentResource extends Resource
                                         ->openUrlInNewTab(),
                                     \Filament\Actions\Action::make('moverAluno')
                                         ->label('Mover Aluno')
-                                        ->icon('heroicon-o-arrow-right-circle')
-                                        ->color('warning')
+                                        ->icon('heroicon-s-arrow-right-circle')
+                                        ->color('success')
                                         ->requiresConfirmation()
                                         ->modalHeading('Mover Aluno para Outra Instituição')
                                         ->modalDescription(fn () => 'O aluno "' . ($record->candidate?->full_name ?? 'N/A') . '" será transferido para outra instituição mantendo todas as suas informações, inscrições e disciplinas.')
@@ -547,8 +547,8 @@ class StudentClassEnrollmentResource extends Resource
                                                 ->duration(5000)
                                                 ->send();
                                         })
-                                        ->modalSubmitActionLabel('Confirmar Transferência')
-                                        ->modalCancelActionLabel('Cancelar'),
+                                        ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->label('Confirmar Transferência')->color('primary'))
+                                        ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->label('Cancelar')->color('danger')),
                                 ])
                                 ->schema([
                                     \Filament\Infolists\Components\TextEntry::make('student_number')->label('Nº Aluno'),
