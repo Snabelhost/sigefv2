@@ -20,6 +20,9 @@ class CoursePlanResource extends Resource
     protected static ?string $navigationLabel = 'Planos de Curso';
     protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
     protected static ?int $navigationSort = 3;
+    
+    // Desabilitar tenancy automática - filtragem manual em getEloquentQuery
+    protected static ?string $tenantOwnershipRelationshipName = null;
 
     public static function getModelLabel(): string
     {

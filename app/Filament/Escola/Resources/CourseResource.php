@@ -20,6 +20,9 @@ class CourseResource extends Resource
     protected static ?string $pluralModelLabel = 'Cursos';
     protected static ?int $navigationSort = 1;
     protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
+    
+    // Desabilitar tenancy automática
+    protected static ?string $tenantOwnershipRelationshipName = null;
 
     public static function form(Schema $form): Schema
     {

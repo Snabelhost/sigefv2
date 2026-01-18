@@ -74,3 +74,12 @@ Route::middleware(['auth'])->prefix('certificados')->name('certificados.')->grou
     Route::get('/individual/{student}', [\App\Http\Controllers\CertificadoController::class, 'individual'])->name('individual');
     Route::get('/bulk', [\App\Http\Controllers\CertificadoController::class, 'bulk'])->name('bulk');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Ficha de Inscrição do Aluno
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/student/{student}/print-ficha', [\App\Http\Controllers\StudentController::class, 'printFicha'])->name('student.print-ficha');
+});

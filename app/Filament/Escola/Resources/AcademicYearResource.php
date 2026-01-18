@@ -18,6 +18,9 @@ class AcademicYearResource extends Resource
     protected static ?string $navigationLabel = 'Anos Académicos';
     protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
     protected static ?int $navigationSort = 0;
+    
+    // Desabilitar tenancy automática
+    protected static ?string $tenantOwnershipRelationshipName = null;
 
     public static function getModelLabel(): string
     {

@@ -155,7 +155,9 @@ class AgentResource extends Resource
                                     ->options(Institution::pluck('name', 'id'))
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->disabled(fn ($record) => $record !== null)
+                                    ->helperText(fn ($record) => $record !== null ? 'Use o botão "Mover" para transferir o agente' : null),
 
                                 Forms\Components\Select::make('provenance_id')
                                     ->label('Proveniência (Órgão/Unidade)')
@@ -178,11 +180,7 @@ class AgentResource extends Resource
                                     ->placeholder('9XX XXX XXX')
                                     ->mask('999 999 999')
                                     ->maxLength(20)
-                                    ->required()
-                                    ->unique(table: 'students', column: 'phone', ignoreRecord: true)
-                                    ->validationMessages([
-                                        'unique' => 'Já existe um agente com este número de telefone.',
-                                    ]),
+                                    ->required(),
                                 
                                 // Campos ocultos necessários
                                 Forms\Components\Hidden::make('student_type')
@@ -448,6 +446,46 @@ class AgentResource extends Resource
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->successNotificationTitle('Agente atualizado com sucesso!'),
+                \Filament\Actions\Action::make('moverAgente')
+                    ->label('Mover')
+                    ->icon('heroicon-o-arrow-right-circle')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Mover Agente para Outra Instituição')
+                    ->modalDescription(fn (Student $record) => 'O agente "' . ($record->candidate?->full_name ?? 'N/A') . '" será transferido para outra instituição mantendo todas as suas informações.')
+                    ->modalIcon('heroicon-o-building-office')
+                    ->form([
+                        Forms\Components\Placeholder::make('current_institution')
+                            ->label('Instituição Actual')
+                            ->content(fn (Student $record) => $record->institution?->name ?? 'Sem instituição definida'),
+                        Forms\Components\Select::make('new_institution_id')
+                            ->label('Nova Instituição')
+                            ->options(fn (Student $record) => Institution::where('id', '!=', $record->institution_id)->pluck('name', 'id'))
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->helperText('Selecione a instituição de destino'),
+                    ])
+                    ->action(function (Student $record, array $data): void {
+                        $oldInstitution = $record->institution?->name ?? 'N/A';
+                        $newInstitution = Institution::find($data['new_institution_id'])?->name ?? 'N/A';
+                        
+                        // Atualizar a instituição do agente (student)
+                        $record->update(['institution_id' => $data['new_institution_id']]);
+                        
+                        // Atualizar também o candidato associado
+                        if ($record->candidate) {
+                            $record->candidate->update(['institution_id' => $data['new_institution_id']]);
+                        }
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Agente Movido com Sucesso!')
+                            ->body("O agente foi transferido de \"{$oldInstitution}\" para \"{$newInstitution}\".")
+                            ->success()
+                            ->send();
+                    })
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->label('Confirmar Transferência')->color('primary'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->label('Cancelar')->color('danger')),
                 \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([

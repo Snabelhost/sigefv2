@@ -20,6 +20,9 @@ class CoursePhaseResource extends Resource
     protected static ?string $navigationLabel = 'Fases do Curso';
     protected static string|\UnitEnum|null $navigationGroup = 'Currículo';
     protected static ?int $navigationSort = 2;
+    
+    // Desabilitar tenancy automática - filtragem manual em getEloquentQuery
+    protected static ?string $tenantOwnershipRelationshipName = null;
 
     public static function getModelLabel(): string
     {

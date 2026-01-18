@@ -111,16 +111,37 @@ class StudentClassEnrollmentResource extends Resource
                 Tables\Columns\TextColumn::make('student_number')
                     ->label('Nº Aluno')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('candidate.full_name')
                     ->label('Nome do Aluno')
                     ->searchable()
                     ->sortable()
-                    ->wrap(),
+                    ->wrap()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('student_type')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn ($state) => $typeColors[$state] ?? 'gray'),
+                    ->color(fn ($state) => $typeColors[$state] ?? 'gray')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('cia')
+                    ->label('CIA')
+                    ->formatStateUsing(fn ($state) => $state ? "{$state}ª CIA" : null)
+                    ->sortable()
+                    ->placeholder('-')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('platoon')
+                    ->label('Pelotão')
+                    ->formatStateUsing(fn ($state) => $state ? "{$state}º Pelotão" : null)
+                    ->sortable()
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('section')
+                    ->label('Secção')
+                    ->formatStateUsing(fn ($state) => $state ? "{$state}ª Secção" : null)
+                    ->sortable()
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('classEnrollments')
                     ->label('Curso')
                     ->getStateUsing(fn (Student $record) => 
@@ -131,12 +152,19 @@ class StudentClassEnrollmentResource extends Resource
                             ->implode(', ') ?: '-'
                     )
                     ->wrap()
-                    ->placeholder('-'),
+                    ->placeholder('-')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('institution.name')
+                    ->label('Instituição')
+                    ->wrap()
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('subject_enrollments_count')
-                    ->label('Total de Disciplinas')
+                    ->label('Total Disc')
                     ->badge()
                     ->color('primary')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('student_type')
@@ -147,6 +175,18 @@ class StudentClassEnrollmentResource extends Resource
                     ->relationship('institution', 'name')
                     ->searchable()
                     ->preload(),
+                Tables\Filters\SelectFilter::make('cia')
+                    ->label('CIA')
+                    ->options(fn () => Student::whereNotNull('cia')->distinct()->pluck('cia', 'cia'))
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('platoon')
+                    ->label('Pelotão')
+                    ->options(fn () => Student::whereNotNull('platoon')->distinct()->pluck('platoon', 'platoon'))
+                    ->searchable(),
+                Tables\Filters\SelectFilter::make('section')
+                    ->label('Secção')
+                    ->options(fn () => Student::whereNotNull('section')->distinct()->pluck('section', 'section'))
+                    ->searchable(),
             ])
             ->headerActions([
                 \Filament\Actions\Action::make('novaInscricao')
@@ -345,6 +385,23 @@ class StudentClassEnrollmentResource extends Resource
                                     ->required(),
                             ]),
                         
+                        // CIA, Pelotão e Secção
+                        \Filament\Schemas\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\Select::make('cia')
+                                    ->label('CIA')
+                                    ->options(collect(range(1, 15))->mapWithKeys(fn ($n) => [$n => "{$n}ª CIA"]))
+                                    ->searchable(),
+                                Forms\Components\Select::make('platoon')
+                                    ->label('Pelotão')
+                                    ->options(collect(range(1, 15))->mapWithKeys(fn ($n) => [$n => "{$n}º PELOTÃO"]))
+                                    ->searchable(),
+                                Forms\Components\Select::make('section')
+                                    ->label('Secção')
+                                    ->options(collect(range(1, 15))->mapWithKeys(fn ($n) => [$n => "{$n}ª SECÇÃO"]))
+                                    ->searchable(),
+                            ]),
+                        
                         // Disciplinas - última linha inteira (filtradas pela fase)
                         Forms\Components\Select::make('subject_ids')
                             ->label('Disciplinas')
@@ -380,12 +437,15 @@ class StudentClassEnrollmentResource extends Resource
                             ->helperText('Disciplinas da fase selecionada'),
                     ])
                     ->action(function (array $data): void {
-                        // Actualizar tipo do aluno
+                        // Actualizar tipo do aluno e dados de localização
                         $student = Student::find($data['student_id']);
                         if ($student) {
                             $student->update([
                                 'student_type' => $data['student_type'],
                                 'enrollment_date' => now(),
+                                'cia' => $data['cia'] ?? null,
+                                'platoon' => $data['platoon'] ?? null,
+                                'section' => $data['section'] ?? null,
                             ]);
                         }
                         
@@ -427,6 +487,103 @@ class StudentClassEnrollmentResource extends Resource
                     ->successNotificationTitle('Aluno inscrito com sucesso!'),
             ])
             ->actions([
+                \Filament\Actions\Action::make('visualizar')
+                    ->label('Ver')
+                    ->icon('heroicon-o-eye')
+                    ->color('gray')
+                    ->modalHeading(fn (Student $record) => 'Detalhes - ' . ($record->candidate?->full_name ?? 'N/A'))
+                    ->modalWidth('3xl')
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->label('Fechar')->icon('heroicon-o-x-mark')->color('danger'))
+                    ->infolist(function (Student $record) {
+                        return [
+                            \Filament\Schemas\Components\Section::make('Dados Pessoais')
+                                ->headerActions([
+                                    \Filament\Actions\Action::make('imprimirFicha')
+                                        ->label('Baixar Ficha PDF')
+                                        ->icon('heroicon-o-arrow-down-tray')
+                                        ->color('primary')
+                                        ->url(fn () => route('student.print-ficha', ['student' => $record->id]))
+                                        ->openUrlInNewTab(),
+                                    \Filament\Actions\Action::make('moverAluno')
+                                        ->label('Mover Aluno')
+                                        ->icon('heroicon-o-arrow-right-circle')
+                                        ->color('warning')
+                                        ->requiresConfirmation()
+                                        ->modalHeading('Mover Aluno para Outra Instituição')
+                                        ->modalDescription(fn () => 'O aluno "' . ($record->candidate?->full_name ?? 'N/A') . '" será transferido para outra instituição mantendo todas as suas informações, inscrições e disciplinas.')
+                                        ->modalIcon('heroicon-o-building-office')
+                                        ->form([
+                                            Forms\Components\Placeholder::make('current_institution')
+                                                ->label('Instituição Actual')
+                                                ->content(fn () => $record->institution?->name ?? 'Sem instituição definida'),
+                                            Forms\Components\Select::make('new_institution_id')
+                                                ->label('Nova Instituição')
+                                                ->options(fn () => \App\Models\Institution::where('id', '!=', $record->institution_id)->pluck('name', 'id'))
+                                                ->required()
+                                                ->searchable()
+                                                ->preload()
+                                                ->helperText('Selecione a instituição de destino'),
+                                        ])
+                                        ->action(function (array $data) use ($record): void {
+                                            $oldInstitution = $record->institution?->name ?? 'N/A';
+                                            $newInstitution = \App\Models\Institution::find($data['new_institution_id'])?->name ?? 'N/A';
+                                            
+                                            // 1. Atualizar a instituição do aluno (Student)
+                                            $record->update(['institution_id' => $data['new_institution_id']]);
+                                            
+                                            // 2. Atualizar o candidato associado (se existir)
+                                            if ($record->candidate) {
+                                                $record->candidate->update(['institution_id' => $data['new_institution_id']]);
+                                            }
+                                            
+                                            // 3. As inscrições de turma e disciplinas permanecem intactas
+                                            // pois estão vinculadas ao student_id, não à instituição
+                                            
+                                            \Filament\Notifications\Notification::make()
+                                                ->title('Aluno Movido com Sucesso!')
+                                                ->body("Transferido de \"{$oldInstitution}\" para \"{$newInstitution}\". Todas as inscrições e disciplinas foram mantidas.")
+                                                ->success()
+                                                ->duration(5000)
+                                                ->send();
+                                        })
+                                        ->modalSubmitActionLabel('Confirmar Transferência')
+                                        ->modalCancelActionLabel('Cancelar'),
+                                ])
+                                ->schema([
+                                    \Filament\Infolists\Components\TextEntry::make('student_number')->label('Nº Aluno'),
+                                    \Filament\Infolists\Components\TextEntry::make('candidate.full_name')->label('Nome Completo'),
+                                    \Filament\Infolists\Components\TextEntry::make('candidate.bi_number')->label('Nº BI'),
+                                    \Filament\Infolists\Components\TextEntry::make('candidate.phone')->label('Telefone'),
+                                    \Filament\Infolists\Components\TextEntry::make('student_type')->label('Estado')->badge(),
+                                    \Filament\Infolists\Components\TextEntry::make('institution.name')->label('Instituição'),
+                                ])->columns(3),
+                            \Filament\Schemas\Components\Section::make('Localização')
+                                ->schema([
+                                    \Filament\Infolists\Components\TextEntry::make('cia')
+                                        ->label('CIA')
+                                        ->formatStateUsing(fn ($state) => $state ? "{$state}ª CIA" : '-'),
+                                    \Filament\Infolists\Components\TextEntry::make('platoon')
+                                        ->label('Pelotão')
+                                        ->formatStateUsing(fn ($state) => $state ? "{$state}º PELOTÃO" : '-'),
+                                    \Filament\Infolists\Components\TextEntry::make('section')
+                                        ->label('Secção')
+                                        ->formatStateUsing(fn ($state) => $state ? "{$state}ª SECÇÃO" : '-'),
+                                ])->columns(3),
+                            \Filament\Schemas\Components\Section::make('Curso e Disciplinas')
+                                ->schema([
+                                    \Filament\Infolists\Components\TextEntry::make('classEnrollments')
+                                        ->label('Curso')
+                                        ->getStateUsing(fn () => $record->classEnrollments
+                                            ->map(fn ($e) => $e->studentClass?->courseMap?->course?->name)
+                                            ->filter()->unique()->implode(', ') ?: '-'),
+                                    \Filament\Infolists\Components\TextEntry::make('subject_enrollments_count')
+                                        ->label('Total de Disciplinas')
+                                        ->badge()
+                                        ->color('primary'),
+                                ])->columns(2),
+                        ];
+                    }),
                 \Filament\Actions\Action::make('editarInscricoes')
                     ->label('Editar')
                     ->icon('heroicon-o-pencil-square')
@@ -620,7 +777,13 @@ class StudentClassEnrollmentResource extends Resource
                 \Filament\Actions\BulkAction::make('formandoParaEmFormacao')
                     ->label('Formandos → Em Formação')
                     ->icon('heroicon-o-academic-cap')
-                    ->color('success')
+                    ->color('gray')
+                    ->extraAttributes([
+                        'style' => 'background-color: #0d5442 !important; color: white !important; border-color: #0d5442 !important;',
+                        'class' => 'formandos-btn',
+                        'onmouseover' => "this.style.backgroundColor='#04de71'; this.style.borderColor='#04de71';",
+                        'onmouseout' => "this.style.backgroundColor='#0d5442'; this.style.borderColor='#0d5442';",
+                    ])
                     ->deselectRecordsAfterCompletion()
                     ->requiresConfirmation()
                     ->modalHeading('Iniciar Formação Superior')

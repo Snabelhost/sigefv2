@@ -145,7 +145,10 @@ class CandidateResource extends Resource
                                 ->searchable()
                                 ->preload()
                                 ->required()
-                                ->helperText('Seleccione a escola onde o alistado será formado'),
+                                ->disabled(fn ($record) => $record !== null)
+                                ->helperText(fn ($record) => $record !== null 
+                                    ? 'Use o botão "Mover" para transferir o alistado' 
+                                    : 'Seleccione a escola onde o alistado será formado'),
                             Forms\Components\TextInput::make('student_number')
                                 ->label('Nº de Ordem')
                                 ->maxLength(50)
@@ -227,11 +230,7 @@ class CandidateResource extends Resource
                                 ->placeholder('9XX XXX XXX')
                                 ->mask('999 999 999')
                                 ->maxLength(191)
-                                ->required()
-                                ->unique(ignoreRecord: true)
-                                ->validationMessages([
-                                    'unique' => 'Já existe um candidato com este número de telefone.',
-                                ]),
+                                ->required(),
                             Forms\Components\TextInput::make('email')
                                 ->label('E-mail')
                                 ->email()
@@ -490,6 +489,49 @@ class CandidateResource extends Resource
                     ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Salvar'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->successNotificationTitle('Alistado atualizado com sucesso!'),
+                \Filament\Actions\Action::make('moverAlistado')
+                    ->label('Mover')
+                    ->icon('heroicon-o-arrow-right-circle')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Mover Alistado para Outra Instituição')
+                    ->modalDescription(fn (Candidate $record) => 'O alistado "' . ($record->full_name ?? 'N/A') . '" será transferido para outra instituição mantendo todas as suas informações.')
+                    ->modalIcon('heroicon-o-building-office')
+                    ->form([
+                        Forms\Components\Placeholder::make('current_institution')
+                            ->label('Instituição Actual')
+                            ->content(fn (Candidate $record) => $record->institution?->name ?? 'Sem instituição definida')
+                            ->extraAttributes(['class' => 'font-bold text-primary-600']),
+                        Forms\Components\Select::make('new_institution_id')
+                            ->label('Nova Instituição')
+                            ->options(fn (Candidate $record) => \App\Models\Institution::where('id', '!=', $record->institution_id)->pluck('name', 'id'))
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->helperText('Selecione a instituição de destino'),
+                    ])
+                    ->action(function (Candidate $record, array $data): void {
+                        $oldInstitution = $record->institution?->name ?? 'N/A';
+                        $newInstitution = \App\Models\Institution::find($data['new_institution_id'])?->name ?? 'N/A';
+                        
+                        // Atualizar a instituição do alistado
+                        $record->update(['institution_id' => $data['new_institution_id']]);
+                        
+                        // Se existir um Student vinculado, também atualizar
+                        $student = \App\Models\Student::where('candidate_id', $record->id)->first();
+                        if ($student) {
+                            $student->update(['institution_id' => $data['new_institution_id']]);
+                        }
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Alistado Movido com Sucesso!')
+                            ->body("Transferido de \"{$oldInstitution}\" para \"{$newInstitution}\".")
+                            ->success()
+                            ->duration(5000)
+                            ->send();
+                    })
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->label('Confirmar Transferência')->color('primary'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->label('Cancelar')->color('danger')),
                 \Filament\Actions\DeleteAction::make()->icon('heroicon-o-trash'),
             ])
             ->bulkActions([

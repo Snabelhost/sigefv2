@@ -19,6 +19,9 @@ class SubjectResource extends Resource
     protected static ?string $modelLabel = 'Disciplina';
     protected static ?string $pluralModelLabel = 'Disciplinas';
     protected static ?int $navigationSort = 8;
+    
+    // Desabilitar tenancy automática
+    protected static ?string $tenantOwnershipRelationshipName = null;
 
     public static function form(Schema $form): Schema
     {
