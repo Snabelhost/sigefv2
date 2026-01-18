@@ -181,9 +181,19 @@ class StudentClassEnrollmentResource extends Resource
                                 if ($state) {
                                     $student = Student::with('candidate')->find($state);
                                     $candidateType = $student?->candidate?->student_type;
+                                    $studentType = $student?->student_type;
                                     
+                                    // Verificar se já tem um tipo definido (Formando - Superior)
+                                    if ($studentType && str_contains(strtolower($studentType), 'formando') && str_contains(strtolower($studentType), 'superior')) {
+                                        $formandoType = StudentType::where('name', 'like', '%Formando%')
+                                            ->where('name', 'like', '%superior%')
+                                            ->first();
+                                        if ($formandoType) {
+                                            $set('student_type', $formandoType->name);
+                                        }
+                                    }
                                     // Auto-preencher Estado baseado no tipo do candidato
-                                    if ($candidateType === 'Agente') {
+                                    elseif ($candidateType === 'Agente') {
                                         // Buscar estado "Formando - superior" ou similar
                                         $formandoType = StudentType::where('name', 'like', '%Formando%')
                                             ->where('name', 'like', '%superior%')
@@ -193,6 +203,13 @@ class StudentClassEnrollmentResource extends Resource
                                         }
                                     } elseif ($candidateType === 'Alistado') {
                                         // Buscar estado "Recruta"
+                                        $recrutaType = StudentType::where('name', 'like', '%Recruta%')->first();
+                                        if ($recrutaType) {
+                                            $set('student_type', $recrutaType->name);
+                                        }
+                                    }
+                                    // Verificar também pelo student_type do próprio student
+                                    elseif ($studentType && str_contains(strtolower($studentType), 'recruta')) {
                                         $recrutaType = StudentType::where('name', 'like', '%Recruta%')->first();
                                         if ($recrutaType) {
                                             $set('student_type', $recrutaType->name);
@@ -523,12 +540,161 @@ class StudentClassEnrollmentResource extends Resource
                             );
                         }
                     })
-                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Adicionar'))
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Adicionar')->color('primary'))
                     ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger'))
                     ->successNotificationTitle('Disciplinas adicionadas!'),
             ])
             ->bulkActions([
-                //
+                // Bulk Action para Recrutas -> Instruendo
+                \Filament\Actions\BulkAction::make('recrutaParaInstruendo')
+                    ->label('Recrutas → Instruendo')
+                    ->icon('heroicon-o-arrow-right-circle')
+                    ->color('info')
+                    ->deselectRecordsAfterCompletion()
+                    ->requiresConfirmation()
+                    ->modalHeading('Promover Recrutas para Instruendo')
+                    ->modalDescription('Os recrutas selecionados serão promovidos para Instruendo e as disciplinas do curso serão adicionadas automaticamente.')
+                    ->modalIcon('heroicon-o-arrow-up-circle')
+                    ->modalIconColor('info')
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                        $newType = '2ª Fase - Instruendo';
+                        $count = 0;
+                        $skipped = 0;
+                        
+                        foreach ($records as $student) {
+                            // Verificar se é Recruta - apenas recrutas podem ser promovidos aqui
+                            if (!str_contains(strtolower($student->student_type ?? ''), 'recruta')) {
+                                $skipped++;
+                                continue;
+                            }
+                            
+                            // Atualizar o tipo do estudante
+                            $student->update(['student_type' => $newType]);
+                            
+                            // Obter a última inscrição de turma
+                            $lastEnrollment = $student->classEnrollments()
+                                ->with('studentClass.courseMap.course.phases')
+                                ->latest()
+                                ->first();
+                            
+                            if ($lastEnrollment) {
+                                $courseId = $lastEnrollment->studentClass?->courseMap?->course_id;
+                                $classId = $lastEnrollment->class_id;
+                                
+                                if ($courseId) {
+                                    $coursePhaseIds = CoursePhase::where('course_id', $courseId)->pluck('id');
+                                    $subjects = Subject::whereIn('course_phase_id', $coursePhaseIds)->get();
+                                    
+                                    foreach ($subjects as $subject) {
+                                        StudentSubjectEnrollment::updateOrCreate(
+                                            [
+                                                'student_id' => $student->id,
+                                                'subject_id' => $subject->id,
+                                                'class_id' => $classId,
+                                                'course_phase_id' => $subject->course_phase_id,
+                                            ],
+                                            ['is_active' => true]
+                                        );
+                                    }
+                                }
+                            }
+                            
+                            $count++;
+                        }
+                        
+                        $msg = "$count recrutas promovidos para 2ª Fase - Instruendo";
+                        if ($skipped > 0) {
+                            $msg .= " ($skipped ignorados por não serem recrutas)";
+                        }
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Promoção concluída!')
+                            ->body($msg)
+                            ->success()
+                            ->send();
+                    })
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Promover')->color('primary'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger')),
+                
+                // Bulk Action para Formandos Superiores -> Em Formação
+                \Filament\Actions\BulkAction::make('formandoParaEmFormacao')
+                    ->label('Formandos → Em Formação')
+                    ->icon('heroicon-o-academic-cap')
+                    ->color('success')
+                    ->deselectRecordsAfterCompletion()
+                    ->requiresConfirmation()
+                    ->modalHeading('Iniciar Formação Superior')
+                    ->modalDescription('Os formandos superiores selecionados serão promovidos para "Em Formação" e as disciplinas do curso serão adicionadas automaticamente.')
+                    ->modalIcon('heroicon-o-academic-cap')
+                    ->modalIconColor('success')
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records): void {
+                        // Criar ou usar estado 'Em Formação Superior'
+                        $emFormacao = StudentType::firstOrCreate(
+                            ['name' => 'Em Formação Superior'],
+                            ['color' => 'warning', 'description' => 'Agentes a frequentar curso superior', 'is_active' => true, 'order' => 5]
+                        );
+                        $newType = $emFormacao->name;
+                        $count = 0;
+                        $skipped = 0;
+                        
+                        foreach ($records as $student) {
+                            // Verificar se é Formando Superior ou Agente
+                            $currentType = strtolower($student->student_type ?? '');
+                            $isFormandoSuperior = str_contains($currentType, 'formando') && str_contains($currentType, 'superior');
+                            $isAgente = str_contains($currentType, 'agente');
+                            
+                            if (!$isFormandoSuperior && !$isAgente) {
+                                $skipped++;
+                                continue;
+                            }
+                            
+                            // Atualizar o tipo do estudante
+                            $student->update(['student_type' => $newType]);
+                            
+                            // Obter a última inscrição de turma
+                            $lastEnrollment = $student->classEnrollments()
+                                ->with('studentClass.courseMap.course.phases')
+                                ->latest()
+                                ->first();
+                            
+                            if ($lastEnrollment) {
+                                $courseId = $lastEnrollment->studentClass?->courseMap?->course_id;
+                                $classId = $lastEnrollment->class_id;
+                                
+                                if ($courseId) {
+                                    $coursePhaseIds = CoursePhase::where('course_id', $courseId)->pluck('id');
+                                    $subjects = Subject::whereIn('course_phase_id', $coursePhaseIds)->get();
+                                    
+                                    foreach ($subjects as $subject) {
+                                        StudentSubjectEnrollment::updateOrCreate(
+                                            [
+                                                'student_id' => $student->id,
+                                                'subject_id' => $subject->id,
+                                                'class_id' => $classId,
+                                                'course_phase_id' => $subject->course_phase_id,
+                                            ],
+                                            ['is_active' => true]
+                                        );
+                                    }
+                                }
+                            }
+                            
+                            $count++;
+                        }
+                        
+                        $msg = "$count formandos promovidos para $newType";
+                        if ($skipped > 0) {
+                            $msg .= " ($skipped ignorados por não serem formandos superiores)";
+                        }
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Formação iniciada!')
+                            ->body($msg)
+                            ->success()
+                            ->send();
+                    })
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-check')->label('Iniciar Formação')->color('primary'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action->icon('heroicon-o-x-mark')->label('Cancelar')->color('danger')),
             ]);
     }
 

@@ -64,10 +64,21 @@ class AuditResource extends BaseAuditResource
                     ->icon('heroicon-o-arrow-uturn-left')
                     ->color('warning')
                     ->requiresConfirmation()
+                    ->modalIcon('heroicon-o-arrow-uturn-left')
+                    ->modalIconColor('warning')
                     ->modalHeading('Reverter Alteração')
                     ->modalDescription('Tem a certeza que deseja reverter esta alteração? Os valores antigos serão restaurados.')
                     ->modalSubmitActionLabel('Sim, reverter')
                     ->modalCancelActionLabel('Cancelar')
+                    ->extraModalFooterActions([])
+                    ->modalSubmitAction(fn (\Filament\Actions\Action $action) => $action
+                        ->icon('heroicon-o-check')
+                        ->color('primary')
+                        ->label('Sim, reverter'))
+                    ->modalCancelAction(fn (\Filament\Actions\Action $action) => $action
+                        ->icon('heroicon-o-x-mark')
+                        ->color('danger')
+                        ->label('Cancelar'))
                     ->visible(fn ($record) => $record->event === 'updated' && !empty($record->old_values))
                     ->action(function ($record) {
                         try {

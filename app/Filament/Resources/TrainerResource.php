@@ -177,7 +177,8 @@ class TrainerResource extends Resource
                                 ])
                                 ->searchable()
                                 ->preload()
-                                ->required(),
+                                ->required()
+                                ->columnSpan(2),
                             Forms\Components\TextInput::make('phone')
                                 ->label('Telefone')
                                 ->tel()
@@ -185,12 +186,13 @@ class TrainerResource extends Resource
                                 ->placeholder('9XX XXX XXX')
                                 ->mask('999 999 999')
                                 ->maxLength(191)
-                                ->required(),
+                                ->required()
+                                ->columnSpan(2),
                             Forms\Components\Toggle::make('is_active')
                                 ->label('Activo')
                                 ->default(true)
                                 ->required(),
-                        ])->columns(3),
+                        ])->columns(5),
                 ])->columnSpanFull(),
             ]);
     }
